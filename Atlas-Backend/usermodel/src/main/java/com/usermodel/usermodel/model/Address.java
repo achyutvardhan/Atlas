@@ -29,7 +29,4 @@ public class Address {
     private String city;
     private String state;
     private int pincode;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_details_id")
-    private UserDetails userDetails;
 }
