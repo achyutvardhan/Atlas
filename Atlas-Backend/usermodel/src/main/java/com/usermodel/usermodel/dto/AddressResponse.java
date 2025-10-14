@@ -5,8 +5,7 @@ import java.util.UUID;
 import lombok.Data;
 
 @Data
-public class AddressResp {
-    private UUID addressId;
+public class AddressResponse {
     private String street;
     private String city;
     private String state;

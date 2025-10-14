@@ -1,5 +1,6 @@
 package com.usermodel.usermodel.model;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +36,7 @@ public class User {
     private String username;
     private String password;
     private String token;
+    private Date tokenExpiration;
     @OneToOne (cascade = CascadeType.ALL)
     private UserDetails userDetails;
     
