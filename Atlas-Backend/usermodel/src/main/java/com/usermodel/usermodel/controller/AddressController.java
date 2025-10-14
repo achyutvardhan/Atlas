@@ -29,7 +29,7 @@ public class AddressController {
     }
 
     @GetMapping("/get-All-user-address")
-    public ResponseEntity<List₹<AddressResponse>> getAllUserAddress(@RequestHeader(name = "Authorization") String authHeader)
+    public ResponseEntity<List<AddressResponse>> getAllUserAddress(@RequestHeader(name = "Authorization") String authHeader)
     {
         List<AddressResponse> adrep = userService.getAllUserAddress(authHeader);
         return ResponseEntity.ok().body(adrep);
