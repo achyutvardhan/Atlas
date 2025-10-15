@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +12,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.usermodel.usermodel.dto.AddressRequest;
 import com.usermodel.usermodel.dto.AddressResponse;
 import com.usermodel.usermodel.dto.LoginResponse;
 import com.usermodel.usermodel.dto.ProfileResponse;
+import com.usermodel.usermodel.dto.userDTO;
 import com.usermodel.usermodel.model.Address;
 import com.usermodel.usermodel.model.User;
 import com.usermodel.usermodel.model.UserDetails;
@@ -35,9 +38,18 @@ public class userService {
       @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public userDTO getUserById(UUID id){
+        User user = userRepo.findById(id).orElse(null);
+        if(user == null) return new userDTO();
+        userDTO userdto = new userDTO();
+        userdto.setUserId(user.getUserid());
+        userdto.setUserName(user.getUsername());
+        return userdto;
+    }
 
-    public boolean authenticateUser(String email, String password){
-        User user = userRepo.findByEmail(email);
+
+    public boolean authenticateUser(String username, String password){
+        User user = userRepo.findByUsername(username);
         if(user == null) return false;
         if(passwordEncoder.matches(password, user.getPassword())) return true;
         else return false;
@@ -84,11 +96,12 @@ public class userService {
         ProfileResponse pr = new ProfileResponse();
         pr.setEmail(user.getUserDetails().getEmail());
         pr.setPhoneNo(user.getUserDetails().getPhoneNo());
+        pr.setUsername(user.getUsername());
         return pr;
     }
 
 
-    public AddressResponse saveAddress(String authHeader , AddressResponse adr){
+    public AddressResponse saveAddress(String authHeader , AddressRequest adr){
         String token = checkToken(authHeader);
         if(token == null) return new AddressResponse();
         User user = userRepo.findByToken(token);
@@ -97,11 +110,12 @@ public class userService {
         address.setStreet(adr.getStreet());
         address.setCity(adr.getCity());
         address.setState(adr.getState());
-        Address savedAddress = addressRepo.save(address);
+        user.getAddress().add(address);
+        userRepo.save(user);
         AddressResponse adrep = new AddressResponse();
-        adrep.setStreet(savedAddress.getStreet());
-        adrep.setCity(savedAddress.getCity());
-        adrep.setState(savedAddress.getState());
+        adrep.setStreet(address.getStreet());
+        adrep.setCity(address.getCity());
+        adrep.setState(address.getState());
         return adrep;
     }
 

@@ -27,11 +27,8 @@ public class CartItems {
     private UUID cartItemsId;
     
     private int QuantityAdded;
-
-    @ManyToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cardId;
-
     private UUID productId;
+    private String productName;
+    private UUID cartId ;
     
 }

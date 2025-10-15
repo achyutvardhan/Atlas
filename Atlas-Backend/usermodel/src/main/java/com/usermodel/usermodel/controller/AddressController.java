@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.usermodel.usermodel.dto.AddressRequest;
 import com.usermodel.usermodel.dto.AddressResponse;
 import com.usermodel.usermodel.services.userService;
 
@@ -22,7 +23,7 @@ public class AddressController {
     private userService userService;
 
     @PostMapping("/add-user-address")
-    public ResponseEntity<AddressResponse> addUserAddress(@RequestHeader(name = "Authorization") String authHeader, @RequestBody AddressResponse adr)
+    public ResponseEntity<AddressResponse> addUserAddress(@RequestHeader(name = "Authorization") String authHeader, @RequestBody AddressRequest adr)
     {
         AddressResponse adrep = userService.saveAddress(authHeader, adr);
         return ResponseEntity.ok().body(adrep);

@@ -37,9 +37,9 @@ public class User {
     private String password;
     private String token;
     private Date tokenExpiration;
-    @OneToOne (cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private UserDetails userDetails;
-    
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> address;
 
