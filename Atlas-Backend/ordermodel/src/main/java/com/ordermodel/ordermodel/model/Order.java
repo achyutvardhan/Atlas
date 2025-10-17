@@ -1,9 +1,12 @@
 package com.ordermodel.ordermodel.model;
 
 import java.sql.Date;
+import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,14 +29,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID orderId;
-
     private UUID usersId;
-
-    @OneToMany(mappedBy = "order")
-    private java.util.List<OrderProd> orderProds;
-
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<OrderProd> orderProds;
     private Date orderedDate;
     private boolean status;
     private UUID addressId;
-
+    private boolean isCancelled; 
 }

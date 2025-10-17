@@ -33,4 +33,5 @@ public class UserDetails {
     private UUID userDetailsId;
     private String email;
     private String phoneNo;
+    // private Date dateOfCreation;
 }

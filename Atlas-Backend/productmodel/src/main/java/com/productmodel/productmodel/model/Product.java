@@ -4,7 +4,9 @@ import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +34,9 @@ public class Product {
     private int productRating;
     private Date productDoa;
     
-    @OneToMany(mappedBy = "product")
+    @OneToMany(cascade = CascadeType.ALL , fetch = FetchType.LAZY)
     private List<Images> img;
-
+    private int price;
+    private String description;
+    private String category;
 }

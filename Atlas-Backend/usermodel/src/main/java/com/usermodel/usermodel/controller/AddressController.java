@@ -26,6 +26,7 @@ public class AddressController {
     public ResponseEntity<AddressResponse> addUserAddress(@RequestHeader(name = "Authorization") String authHeader, @RequestBody AddressRequest adr)
     {
         AddressResponse adrep = userService.saveAddress(authHeader, adr);
+        if(adrep == null)return ResponseEntity.status(403).build();
         return ResponseEntity.ok().body(adrep);
     }
 

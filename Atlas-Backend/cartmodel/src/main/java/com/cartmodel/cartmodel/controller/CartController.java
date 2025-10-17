@@ -59,5 +59,4 @@ public class CartController {
         return ResponseEntity.ok("Cart cleared successfully");
     }
     // checkout
-
 }

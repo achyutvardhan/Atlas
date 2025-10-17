@@ -24,10 +24,10 @@ public class OrderProd {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID ordProdId;
+    private String productName;
     private int quantity;
-    private int priceAtPurchase;
-
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    private int price;
+    private String description;
+    private String category;
+    private boolean inStock;
 }

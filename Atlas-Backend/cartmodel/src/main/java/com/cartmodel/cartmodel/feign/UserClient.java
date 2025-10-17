@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.cartmodel.cartmodel.dto.Userdto;
 
-@FeignClient(name = "usermodel" , url = "http://localhost:8081/api")
+@FeignClient(name = "usermodel" , url = "http://localhost:8080/api")
 public interface UserClient {
     @GetMapping("/{id}")
     public Userdto getUserById(UUID id);

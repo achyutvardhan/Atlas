@@ -8,18 +8,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.cartmodel.cartmodel.dto.Userdto;
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
-import com.cartmodel.cartmodel.feign.UserClient;
 import com.cartmodel.cartmodel.model.Cart;
 import com.cartmodel.cartmodel.model.CartItems;
 import com.cartmodel.cartmodel.repo.CartRepo;
 
 @Service
 public class CartService {
-    @Autowired
-    private UserClient userClient;
 
     @Autowired
     private CartRepo cartRepo;

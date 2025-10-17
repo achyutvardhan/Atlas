@@ -28,7 +28,5 @@ public class Images {
     private String ImgFileType;
     private String ImgUrl;
     private int ImgFileSize;
-    @ManyToOne
-    @JoinColumn(name = "product_id")
     private Product product;
 }

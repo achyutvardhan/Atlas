@@ -32,13 +32,9 @@ public class UserController {
     private userService userService;
 
 
-    @GetMapping("/hello")
-    public String getMethodName() {
-        return "Hello World";
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<userDTO> getUserById(@PathVariable UUID id){
+        System.out.println(id);
         userDTO user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }

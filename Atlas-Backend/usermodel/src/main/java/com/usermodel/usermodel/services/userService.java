@@ -1,14 +1,10 @@
 package com.usermodel.usermodel.services;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
-import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +15,6 @@ import com.usermodel.usermodel.dto.ProfileResponse;
 import com.usermodel.usermodel.dto.userDTO;
 import com.usermodel.usermodel.model.Address;
 import com.usermodel.usermodel.model.User;
-import com.usermodel.usermodel.model.UserDetails;
-import com.usermodel.usermodel.repo.AddressRepository;
-import com.usermodel.usermodel.repo.UserDetailsRepository;
 import com.usermodel.usermodel.repo.UserRepository;
 
 @Service
@@ -29,11 +22,6 @@ public class userService {
      
     @Autowired
     private UserRepository userRepo;
-
-    @Autowired
-    private UserDetailsRepository userDetailsRepo;
-    @Autowired
-    private AddressRepository addressRepo;
 
       @Autowired
     private PasswordEncoder passwordEncoder;
@@ -67,8 +55,14 @@ public class userService {
 
     public User registerProfile(User user)
     {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepo.save(user);
+        User existingUser = userRepo.findByUsername(user.getUsername());
+        if(existingUser != null) return existingUser;
+        User newUser = new User();
+        newUser.setAddress(new ArrayList<>());
+        newUser.setUserDetails(user.getUserDetails());
+        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        newUser.setUsername(user.getUsername());
+        return userRepo.save(newUser);
     }
 
     public LoginResponse loginUser(String username , String password){
