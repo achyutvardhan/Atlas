@@ -1,4 +1,5 @@
 package com.productmodel.productmodel.model;
+
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -24,9 +25,6 @@ public class Images {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID imgId;
-    private String ImgFileName;
-    private String ImgFileType;
     private String ImgUrl;
     private int ImgFileSize;
-    private Product product;
 }

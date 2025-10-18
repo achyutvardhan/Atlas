@@ -35,5 +35,5 @@ public class Order {
     private Date orderedDate;
     private boolean status;
     private UUID addressId;
-    private boolean isCancelled; 
+    private boolean isCancelled;
 }

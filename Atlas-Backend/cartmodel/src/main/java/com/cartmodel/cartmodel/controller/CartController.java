@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
+import com.cartmodel.cartmodel.dto.orderResponse;
 import com.cartmodel.cartmodel.services.CartService;
 
 @RestController
@@ -26,37 +28,47 @@ public class CartController {
 
     // addtocart
     @PostMapping("/add-to-cart")
-    public ResponseEntity<cartResponse> addToCart(@RequestBody  cartRequest cartRequest){
+    public ResponseEntity<cartResponse> addToCart(@RequestBody cartRequest cartRequest) {
         cartResponse response = cartService.addToCart(cartRequest);
-        if(response == null){
+        if (response == null) {
             return ResponseEntity.status(400).body(null);
         }
         return ResponseEntity.ok(response);
     }
+
     // removefromcart
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> removeFromCart(@RequestBody UUID cartId, @RequestBody UUID cartItemId){
-        boolean response = cartService.removeFromCart(cartId , cartItemId);
-        if(response == false){
+    @DeleteMapping("/{cartId}/items/{cartItemId}")
+    public ResponseEntity<String> removeFromCart(@PathVariable("cartId") UUID cartId, @PathVariable("cartItemId") UUID cartItemId) {
+        boolean response = cartService.removeFromCart(cartId, cartItemId);
+        if (response == false) {
             return ResponseEntity.status(400).body("Item not found in cart");
         }
         return ResponseEntity.ok("Item removed from cart successfully");
     }
 
     // getcart
-    @GetMapping("/{id}")
-    public ResponseEntity<List<cartResponse>> getAllCartItem(@RequestBody UUID id) {
-        List<cartResponse> response = cartService.getAllCartItem(id);
+    @GetMapping("/{cartId}")
+    public ResponseEntity<List<cartResponse>> getAllCartItem(@PathVariable UUID cartId) {
+        List<cartResponse> response = cartService.getAllCartItem(cartId);
         return ResponseEntity.ok(response);
     }
+
     // clearcart
     @GetMapping("/clear/{id}")
     public ResponseEntity<String> clearCart(@RequestHeader UUID cartId) {
         boolean response = cartService.clearCart(cartId);
-        if(response == false){
+        if (response == false) {
             return ResponseEntity.status(400).body("Cart not found");
         }
         return ResponseEntity.ok("Cart cleared successfully");
     }
     // checkout
+    @GetMapping("/checkout/{cartId}")
+    public ResponseEntity<orderResponse> checkoutCart(@PathVariable("cartId") UUID cartId)
+    {
+        orderResponse dto = cartService.checkoutCart(cartId);
+        if(dto == null)
+        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(dto);
+    } 
 }

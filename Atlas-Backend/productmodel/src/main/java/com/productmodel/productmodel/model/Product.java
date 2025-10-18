@@ -24,7 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Product {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID productId;
@@ -33,8 +33,7 @@ public class Product {
     private boolean inStock;
     private int productRating;
     private Date productDoa;
-    
-    @OneToMany(cascade = CascadeType.ALL , fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Images> img;
     private int price;
     private String description;

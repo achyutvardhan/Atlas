@@ -1,5 +1,6 @@
 package com.cartmodel.cartmodel.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
+import com.cartmodel.cartmodel.dto.orderResponse;
+import com.cartmodel.cartmodel.feign.OrderClient;
 import com.cartmodel.cartmodel.model.Cart;
 import com.cartmodel.cartmodel.model.CartItems;
 import com.cartmodel.cartmodel.repo.CartRepo;
@@ -21,58 +24,81 @@ public class CartService {
     private CartRepo cartRepo;
 
     @Autowired
+    private OrderClient orderClient;
+
+    @Autowired
     private ModelMapper modelMapper;
 
-    public List<cartResponse> getAllCartItem(UUID id)
-    {
+    public List<cartResponse> getAllCartItem(UUID id) {
         Cart carts = cartRepo.findById(id).orElse(null);
         List<cartResponse> cartResponses = carts.getCartItems().stream().map(
-            cartItem -> {
-                cartResponse cartResponse = modelMapper.map(cartItem, cartResponse.class);
-                return cartResponse;
-            }
-        ).collect(Collectors.toList());
+                cartItem -> {
+                    cartResponse cartResponse = modelMapper.map(cartItem, cartResponse.class);
+                    return cartResponse;
+                }).collect(Collectors.toList());
 
         return cartResponses;
     }
 
-
-    public boolean removeFromCart(UUID cartId, UUID cartItemId){
-        Cart cart = cartRepo.findById(cartId).orElse(new Cart());
-        cart.getCartItems().removeIf(item -> item.getCartItemsId().equals(cartItemId));
-        cartRepo.save(cart);
-        return true;
+    public boolean removeFromCart(UUID cartId, UUID cartItemId) {
+        Cart cart = cartRepo.findById(cartId).orElse(null);
+         if(cart == null || cart.getCartItems() == null) return false;
+        boolean removed = cart.getCartItems().removeIf(item -> item.getCartItemsId().equals(cartItemId));
+        if(removed) cartRepo.save(cart);
+        return removed;
     }
 
-    public boolean clearCart(UUID cartId){
+    public boolean clearCart(UUID cartId) {
         Cart cart = cartRepo.findById(cartId).orElse(new Cart());
+        if(cart == null || cart.getCartItems() == null) return false;
+        if(cart.getCartItems().isEmpty()) return true;
         cart.getCartItems().clear();
         cartRepo.save(cart);
         return true;
     }
 
-    public cartResponse addToCart(cartRequest cartRequest){
+    public cartResponse addToCart(cartRequest cartRequest) {
         Cart cart = cartRepo.findById(cartRequest.getCartId()).orElse(null);
-        if(cart == null){
+        if (cart == null) {
             cart = new Cart();
-            cart.setCartId(UUID.randomUUID());
             cart.setUsersId(cartRequest.getUsersId());
+            cart.setCartItems(new ArrayList<>());
+        } else if (cart.getCartItems() == null) {
+            cart.setCartItems(new ArrayList<>());
         }
-        CartItems cartItems = modelMapper.map(cartRequest, CartItems.class);
-        if(cart.getCartItems().indexOf(cartItems) != -1){
-            cartItems.setQuantityAdded(cartItems.getQuantityAdded() + cartRequest.getQuantityAdded());
-            Cart updatedCart = cartRepo.save(cart);
-            cartResponse cartResponse = modelMapper.map(updatedCart, cartResponse.class);
-            return cartResponse;
+        CartItems existing = cart.getCartItems().stream()
+                .filter(ci -> ci.getProductId().equals(cartRequest.getProductId()))
+                .findFirst()
+                .orElse(null);
+        if (existing != null) {
+            existing.setQuantityAdded(existing.getQuantityAdded() + cartRequest.getQuantityAdded());
+        } else {
+            CartItems cartItem = modelMapper.map(cartRequest, CartItems.class);
+            cartItem.setCartItemsId(null); 
+            cart.getCartItems().add(cartItem);
         }
-        cart.getCartItems().addLast(cartItems);
-        Cart updatedCart = cartRepo.save(cart);
-        int index = updatedCart.getCartItems().indexOf(cartItems);
-        cartResponse cartResponse = null;
-        if(index != -1){
-         cartResponse = modelMapper.map(updatedCart, cartResponse.class);
-       }
-       return cartResponse;
+
+        Cart saved = cartRepo.save(cart);
+
+        CartItems returnedItem = saved.getCartItems().stream()
+                .filter(ci -> ci.getProductId().equals(cartRequest.getProductId()))
+                .findFirst()
+                .orElse(null);
+
+        if (returnedItem == null)
+            return null;
+        cartResponse resp = modelMapper.map(returnedItem, cartResponse.class);
+        return resp;
+    }
+
+
+    public orderResponse checkoutCart(UUID cartId)
+    {
+        orderResponse dto = orderClient.placeOrder(cartId);
+        if(dto == null) return null;
+        Cart cart = cartRepo.findById(cartId).orElse(null);
+        cartRepo.delete(cart);
+        return dto;
     }
 
 }

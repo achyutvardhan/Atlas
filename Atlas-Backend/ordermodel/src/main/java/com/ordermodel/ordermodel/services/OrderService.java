@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.ordermodel.ordermodel.dto.ProductDto;
 import com.ordermodel.ordermodel.dto.orderRequest;
 import com.ordermodel.ordermodel.dto.orderResponse;
+import com.ordermodel.ordermodel.feign.CartClient;
 import com.ordermodel.ordermodel.feign.ProductClient;
 import com.ordermodel.ordermodel.model.Order;
 import com.ordermodel.ordermodel.model.OrderProd;
@@ -25,14 +26,18 @@ public class OrderService {
     private ProductClient ProductClient;
 
     @Autowired
+    private CartClient cartClient;
+
+    @Autowired
     private ModelMapper modelMapper;
 
-    public orderResponse placeOrder(List<orderRequest> orderRequests) {
+    public orderResponse placeOrder(UUID cartId) {
+        List<orderRequest> orderRequests = cartClient.getAllCartItem(cartId);
          List<OrderProd> savedOrders = new ArrayList<>();
         orderRequests.forEach(product -> {
             ProductDto productdto = ProductClient.getProductById(product.getProductId());
             OrderProd orderProd = modelMapper.map(productdto, OrderProd.class);
-            orderProd.setQuantity(product.getQuantity());
+            orderProd.setQuantityAdded(product.getQuantityAdded());
             savedOrders.add(orderProd);
         });
         Order newOrder = new Order();

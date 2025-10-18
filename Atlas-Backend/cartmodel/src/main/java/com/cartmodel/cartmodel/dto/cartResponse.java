@@ -2,7 +2,6 @@ package com.cartmodel.cartmodel.dto;
 
 import java.util.UUID;
 
-import com.cartmodel.cartmodel.model.Cart;
 
 import lombok.Data;
 

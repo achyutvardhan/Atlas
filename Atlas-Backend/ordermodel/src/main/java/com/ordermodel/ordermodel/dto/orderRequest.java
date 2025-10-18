@@ -7,5 +7,6 @@ import lombok.Data;
 @Data
 public class orderRequest {
     private UUID productId;
-    private int quantity;
+    private UUID cartItemsId;
+    private int QuantityAdded;
 }
