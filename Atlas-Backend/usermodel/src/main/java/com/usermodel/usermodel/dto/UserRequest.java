@@ -6,6 +6,9 @@ import java.util.List;
 import com.usermodel.usermodel.model.Address;
 import com.usermodel.usermodel.model.UserDetails;
 
+import lombok.Data;
+
+@Data
 public class UserRequest {
     private String username;
     private String password;

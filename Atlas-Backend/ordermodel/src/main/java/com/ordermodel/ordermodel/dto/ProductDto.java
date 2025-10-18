@@ -1,6 +1,5 @@
 package com.ordermodel.ordermodel.dto;
 
-import java.sql.Date;
 import java.util.UUID;
 
 import lombok.Data;

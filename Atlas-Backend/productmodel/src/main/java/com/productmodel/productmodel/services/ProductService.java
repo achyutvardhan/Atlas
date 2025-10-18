@@ -48,6 +48,6 @@ public class ProductService {
         if (product == null)
             return null;
             Product saved = productRepository.save(product);
-        return modelMapper.map(product, Productdto.class);
+        return modelMapper.map(saved, Productdto.class);
     }
 }

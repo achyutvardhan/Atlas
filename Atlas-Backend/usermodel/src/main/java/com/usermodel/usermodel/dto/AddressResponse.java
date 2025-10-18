@@ -1,6 +1,5 @@
 package com.usermodel.usermodel.dto;
 
-import java.util.UUID;
 
 import lombok.Data;
 
