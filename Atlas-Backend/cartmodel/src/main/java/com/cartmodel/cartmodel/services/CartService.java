@@ -29,8 +29,22 @@ public class CartService {
     @Autowired
     private ModelMapper modelMapper;
 
-    public List<cartResponse> getAllCartItem(UUID id) {
-        Cart carts = cartRepo.findById(id).orElse(null);
+     public String checkToken(String authHeader){
+        String token = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); 
+        } else {
+            return null;
+        }
+        return token;
+    }
+
+    public List<cartResponse> getAllCartItem(String authHeader) {
+        String token = checkToken(authHeader);
+        if(token == null) return null;
+        // get userId from token and set to cartRequest
+        Cart carts = cartRepo.findByUserId().orElse(null); // userID from token
+        if(carts == null || carts.getCartItems() == null) return new ArrayList<>();
         List<cartResponse> cartResponses = carts.getCartItems().stream().map(
                 cartItem -> {
                     cartResponse cartResponse = modelMapper.map(cartItem, cartResponse.class);
@@ -40,7 +54,10 @@ public class CartService {
         return cartResponses;
     }
 
-    public boolean removeFromCart(UUID cartId, UUID cartItemId) {
+    public boolean removeFromCart(String authHeader,UUID cartId, UUID cartItemId) {
+        String token = checkToken(authHeader);
+        if(token == null) return false;
+        // get userId from token and set to cartRequest
         Cart cart = cartRepo.findById(cartId).orElse(null);
          if(cart == null || cart.getCartItems() == null) return false;
         boolean removed = cart.getCartItems().removeIf(item -> item.getCartItemsId().equals(cartItemId));
@@ -48,8 +65,12 @@ public class CartService {
         return removed;
     }
 
-    public boolean clearCart(UUID cartId) {
+    public boolean clearCart(String authHeader,UUID cartId) {
+        String token = checkToken(authHeader);
+        if(token == null) return false;
+        // get userId from token 
         Cart cart = cartRepo.findById(cartId).orElse(new Cart());
+        if(cart.getUsersId() != /* userID from token */) return false;
         if(cart == null || cart.getCartItems() == null) return false;
         if(cart.getCartItems().isEmpty()) return true;
         cart.getCartItems().clear();
@@ -57,11 +78,14 @@ public class CartService {
         return true;
     }
 
-    public cartResponse addToCart(cartRequest cartRequest) {
+    public cartResponse addToCart(String authHeader,cartRequest cartRequest) {
+        String token = checkToken(authHeader);
+        if(token == null) return null;
+        // get userId from token and set to cartRequest
         Cart cart = cartRepo.findById(cartRequest.getCartId()).orElse(null);
         if (cart == null) {
             cart = new Cart();
-            cart.setUsersId(cartRequest.getUsersId());
+            cart.setUsersId(); // userID from token
             cart.setCartItems(new ArrayList<>());
         } else if (cart.getCartItems() == null) {
             cart.setCartItems(new ArrayList<>());
@@ -92,8 +116,11 @@ public class CartService {
     }
 
 
-    public orderResponse checkoutCart(UUID cartId)
+    public orderResponse checkoutCart(String authHeader,UUID cartId)
     {
+        String token = checkToken(authHeader);
+        if(token == null) return null;
+        // get userId from token
         orderResponse dto = orderClient.placeOrder(cartId);
         if(dto == null) return null;
         Cart cart = cartRepo.findById(cartId).orElse(null);

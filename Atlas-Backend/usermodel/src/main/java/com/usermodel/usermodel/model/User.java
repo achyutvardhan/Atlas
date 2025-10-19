@@ -29,8 +29,8 @@ import lombok.Setter;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID userid;
-    private String username;
+    private UUID userId;
+    private String userName;
     private String password;
     private String token;
     private Date tokenExpiration;

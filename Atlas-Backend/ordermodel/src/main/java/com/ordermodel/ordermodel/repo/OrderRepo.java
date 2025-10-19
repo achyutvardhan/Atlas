@@ -9,5 +9,5 @@ import com.ordermodel.ordermodel.model.Order;
 
 @Repository
 public interface OrderRepo  extends JpaRepository<Order,UUID>{
-    
+    Order findByUserId(UUID userId);
 }

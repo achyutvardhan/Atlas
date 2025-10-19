@@ -31,6 +31,16 @@ public class OrderService {
     @Autowired
     private ModelMapper modelMapper;
 
+     public String checkToken(String authHeader){
+        String token = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7); 
+        } else {
+            return null;
+        }
+        return token;
+    }
+
     public orderResponse placeOrder(UUID cartId) {
         List<orderRequest> orderRequests = cartClient.getAllCartItem(cartId);
          List<OrderProd> savedOrders = new ArrayList<>();
@@ -44,20 +54,28 @@ public class OrderService {
         newOrder.setOrderProds(savedOrders);
         newOrder.setOrderedDate(new Date(System.currentTimeMillis()));
         newOrder.setStatus(true);
+        // newOrder.setUsersId();  // get this from token
         orderRepo.save(newOrder);
         orderResponse orderResponses = modelMapper.map(newOrder, orderResponse.class);
         return orderResponses;
     }
 
-    public orderResponse getAllOrderById(UUID orderId){
-        Order order = orderRepo.findById(orderId).orElse(null);
+    public orderResponse getAllOrderById(String authHeader){
+        String token = checkToken(authHeader);
+        if(token == null) return null;
+        // get userId from token
+        Order order = orderRepo.findByUserId().orElse(null);  // use userId to get all orders
         if(order == null) return null;
         orderResponse orderResponse = modelMapper.map(order, orderResponse.class);
         return orderResponse;
     }
 
-    public orderResponse cancelOrder(UUID orderId){
+    public orderResponse cancelOrder(String authHeader,UUID orderId){
+        String token = checkToken(authHeader);
+        if(token == null) return null;
+        // get userId from token
         Order order = orderRepo.findById(orderId).orElse(null);
+        if(order.getUsersId() != {}) return null; // check if order belongs to user
         if (order == null)return null;
         order.setStatus(false);
         order.setCancelled(true);
