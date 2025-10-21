@@ -1,73 +1,73 @@
 package com.gateway.apigateway.filter;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.lang.NonNull;
-import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.server.WebFilter;
-import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.gateway.apigateway.util.JwtUtil;
 
-import reactor.core.publisher.Mono;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
-public class JwtAuthenticationFilter implements WebFilter {
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     @Autowired
     private JwtUtil jwtUtil;
 
-    // public JwtAuthenticationFilter ( JwtUtil jwtUtil){
-    // this.jwtUtil = jwtUtil;
     @Override
-    @NonNull
-    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain filterChain) {
-        final String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer")) {
-            return filterChain.filter(exchange);
+        String path = request.getRequestURI();
+
+        if (path.startsWith("/auth/") || path.startsWith("/eureka/")) {
+            filterChain.doFilter(request, response);
+            return;
         }
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write("Missing or invalid Authorization header");
+            return;
+        }
+
         final String token = authHeader.substring(7);
-        final UUID userId;
+        UUID userId;
 
         try {
             userId = jwtUtil.extractUserId(token);
         } catch (Exception e) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            DataBuffer buffer = exchange.getResponse()
-                    .bufferFactory()
-                    .wrap("Token is invalid or expired".getBytes(StandardCharsets.UTF_8));
-            return exchange.getResponse().writeWith(Mono.just(buffer));
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.getWriter().write("Token is invalid or expired");
+            return;
         }
 
-        if (userId != null) {
-            return ReactiveSecurityContextHolder.getContext()
-                    .map(ctx -> ctx.getAuthentication())
-                    .defaultIfEmpty(null)
-                    .flatMap(existingAuth -> {
-                        if (existingAuth == null) {
-                            Authentication authentication = new UsernamePasswordAuthenticationToken(userId, null,
-                                    Collections.emptyList());
-                            return filterChain.filter(exchange)
-                                    .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
-                        } else {
-                            return filterChain.filter(exchange);
-                        }
-                    });
+        if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userId, null, Collections.emptyList());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            request.setAttribute("X-USER-ID", userId.toString());
         }
 
-        return filterChain.filter(exchange);
+        filterChain.doFilter(request, response);
     }
 }
