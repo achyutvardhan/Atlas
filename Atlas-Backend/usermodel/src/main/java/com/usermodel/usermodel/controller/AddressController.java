@@ -16,24 +16,24 @@ import com.usermodel.usermodel.dto.AddressResponse;
 import com.usermodel.usermodel.services.userService;
 
 @RestController
-@RequestMapping("/api/address")
+@RequestMapping("/auth/address")
 public class AddressController {
     
     @Autowired
     private userService userService;
 
     @PostMapping("/add-user-address")
-    public ResponseEntity<AddressResponse> addUserAddress(@RequestHeader(name = "Authorization") String authHeader, @RequestBody AddressRequest adr)
+    public ResponseEntity<AddressResponse> addUserAddress(@RequestHeader(name = "X-USER-ID") String userId, @RequestBody AddressRequest adr)
     {
-        AddressResponse adrep = userService.saveAddress(authHeader, adr);
+        AddressResponse adrep = userService.saveAddress(userId, adr);
         if(adrep == null)return ResponseEntity.status(403).build();
         return ResponseEntity.ok().body(adrep);
     }
 
     @GetMapping("/get-All-user-address")
-    public ResponseEntity<List<AddressResponse>> getAllUserAddress(@RequestHeader(name = "Authorization") String authHeader)
+    public ResponseEntity<List<AddressResponse>> getAllUserAddress(@RequestHeader(name = "X-USER-ID") String userId)
     {
-        List<AddressResponse> adrep = userService.getAllUserAddress(authHeader);
+        List<AddressResponse> adrep = userService.getAllUserAddress(userId);
         return ResponseEntity.ok().body(adrep);
     }
 

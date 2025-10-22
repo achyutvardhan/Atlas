@@ -17,89 +17,96 @@ import com.usermodel.usermodel.model.Address;
 import com.usermodel.usermodel.model.User;
 import com.usermodel.usermodel.repo.UserRepository;
 
+
 @Service
 public class userService {
-     
+
     @Autowired
     private UserRepository userRepo;
 
-      @Autowired
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public userDTO getUserById(UUID id){
+    @Autowired
+    private JwtService jwtService;
+
+    public userDTO getUserById(UUID id) {
         User user = userRepo.findById(id).orElse(null);
-        if(user == null) return new userDTO();
+        if (user == null)
+            return new userDTO();
         userDTO userdto = new userDTO();
-        userdto.setUserId(user.getUserid());
-        userdto.setUserName(user.getUsername());
+        userdto.setUserId(user.getUserId());
+        userdto.setUserName(user.getUserName());
         return userdto;
     }
 
-
-    public boolean authenticateUser(String username, String password){
-        User user = userRepo.findByUsername(username);
-        if(user == null) return false;
-        if(passwordEncoder.matches(password, user.getPassword())) return true;
-        else return false;
+    public boolean authenticateUser(String username, String password) {
+        User user = userRepo.findByUserName(username);
+        if (user == null)
+            return false;
+        if (passwordEncoder.matches(password, user.getPassword()))
+            return true;
+        else
+            return false;
     }
 
-     public String checkToken(String authHeader){
-        String token = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); 
-        } else {
-            return null;
-        }
-        return token;
-    }
+    // public String checkToken(String authHeader) {
+    //     String token = null;
+    //     if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    //         token = authHeader.substring(7);
+    //     } else {
+    //         return null;
+    //     }
+    //     return token;
+    // }
 
-    public User registerProfile(User user)
-    {
-        User existingUser = userRepo.findByUsername(user.getUsername());
-        if(existingUser != null) return existingUser;
+    public User registerProfile(User user) {
+        User existingUser = userRepo.findByUserName(user.getUserName());
+        if (existingUser != null)
+            return existingUser;
         User newUser = new User();
         newUser.setAddress(new ArrayList<>());
         newUser.setUserDetails(user.getUserDetails());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        newUser.setUsername(user.getUsername());
+        newUser.setUserName(user.getUserName());
         return userRepo.save(newUser);
     }
 
-    public LoginResponse loginUser(String username , String password){
+    public LoginResponse loginUser(String username, String password) {
         boolean isAuthenticated = authenticateUser(username, password);
-        if(!isAuthenticated) return new LoginResponse();
-        User user = userRepo.findByUsername(username);
-        if(user != null){
+        if (!isAuthenticated)
+            return new LoginResponse();
+        User user = userRepo.findByUserName(username);
+        if (user != null) {
             LoginResponse lr = new LoginResponse();
-            lr.setToken(user.getToken());
+            String token = jwtService.generateToken(user.getUserId(), user.getUserName(), user.getUserDetails().getEmail());
+            user.setToken(token);
+            lr.setToken(token);
             lr.setMessage("Login Successful");
             return lr;
-        }
-        else return new LoginResponse();
+        } else
+            return new LoginResponse();
     }
 
-    public String logoutUser(String token){
+    public String logoutUser(String token) {
         return "Logged Out Successfully";
     }
 
-    public ProfileResponse getUserProfile(String authHeader){
-        String token = checkToken(authHeader);
-        if(token == null) return new ProfileResponse();
-        User user = userRepo.findByToken(token);
-        if(user == null) return new ProfileResponse();
+    public ProfileResponse getUserProfile(String userId) {
+        User user = userRepo.findById(UUID.fromString(userId)).orElse(null);
+        if (user == null)
+            return new ProfileResponse();
         ProfileResponse pr = new ProfileResponse();
         pr.setEmail(user.getUserDetails().getEmail());
         pr.setPhoneNo(user.getUserDetails().getPhoneNo());
-        pr.setUsername(user.getUsername());
+        pr.setUsername(user.getUserName());
         return pr;
     }
 
-
-    public AddressResponse saveAddress(String authHeader , AddressRequest adr){
-        String token = checkToken(authHeader);
-        if(token == null) return new AddressResponse();
-        User user = userRepo.findByToken(token);
-        if(user == null) return new AddressResponse();
+    public AddressResponse saveAddress(String userId, AddressRequest adr) {
+        User user = userRepo.findById(UUID.fromString(userId)).orElse(null);
+        if (user == null)
+            return new AddressResponse();
         Address address = new Address();
         address.setStreet(adr.getStreet());
         address.setCity(adr.getCity());
@@ -113,15 +120,13 @@ public class userService {
         return adrep;
     }
 
-
-    public List<AddressResponse> getAllUserAddress(String authHeader){
-        String token = checkToken(authHeader);
-        if(token == null) return new ArrayList<>();
-        User user = userRepo.findByToken(token);
-        if(user == null) return new ArrayList<>();
+    public List<AddressResponse> getAllUserAddress(String userId) {
+        User user = userRepo.findById(UUID.fromString(userId)).orElse(null);
+        if (user == null)
+            return new ArrayList<>();
         List<Address> addresses = user.getAddress();
         List<AddressResponse> addressResponses = new ArrayList<>();
-        for(Address addr : addresses){
+        for (Address addr : addresses) {
             AddressResponse adrep = new AddressResponse();
             adrep.setStreet(addr.getStreet());
             adrep.setCity(addr.getCity());

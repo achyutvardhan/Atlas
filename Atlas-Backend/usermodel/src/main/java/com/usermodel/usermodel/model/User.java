@@ -33,7 +33,6 @@ public class User {
     private String userName;
     private String password;
     private String token;
-    private Date tokenExpiration;
     @OneToOne(cascade = CascadeType.ALL)
     private UserDetails userDetails;
 

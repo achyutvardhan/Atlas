@@ -25,7 +25,7 @@ import com.usermodel.usermodel.services.userService;
 
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/auth")
 public class UserController {
 
     @Autowired
@@ -43,6 +43,7 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<User> registerProfile(@RequestBody User user){
         User newUser = userService.registerProfile(user);
+        System.out.println("hey there");
         return ResponseEntity.status(HttpStatus.SC_CREATED).body(newUser);
     }
 
@@ -62,8 +63,8 @@ public class UserController {
 
 // get user profile API
    @GetMapping("/profile")
-   public ResponseEntity<ProfileResponse> getUserProfile(@RequestHeader(name = "Authorization") String authHeader){
-    ProfileResponse userDetails = userService.getUserProfile(authHeader);
+   public ResponseEntity<ProfileResponse> getUserProfile(@RequestHeader(name = "X-USER-ID") String userId){
+    ProfileResponse userDetails = userService.getUserProfile(userId);
     if (userDetails.getEmail() == null) {
         return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).body(null);
     }
