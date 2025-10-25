@@ -1,7 +1,6 @@
 package com.cartmodel.cartmodel.repo;
 
 import java.util.UUID;
-import java.util.Locale.Category;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

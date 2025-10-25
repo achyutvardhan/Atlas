@@ -20,7 +20,7 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/auth/login", "/auth/register", "/eureka/**", "/actuator/**","/product/**").permitAll()
+                        .pathMatchers("/auth/login", "/auth/register","/auth/admin/v1/register", "/eureka/**", "/actuator/**").permitAll()
                         .anyExchange().authenticated())
                 .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();

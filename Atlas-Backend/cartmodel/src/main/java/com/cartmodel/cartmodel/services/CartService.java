@@ -6,8 +6,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +40,7 @@ public class CartService {
     //     }
     //     return token;
     // }
-    private static final Logger logger = LoggerFactory.getLogger(CartService.class);
+    // private static final Logger logger = LoggerFactory.getLogger(CartService.class);
 
     public List<cartResponse> getAllCartItem(String userId ,UUID cartId) {
         UUID userid = UUID.fromString(userId);

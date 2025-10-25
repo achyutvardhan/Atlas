@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.web.server.WebFilterChain;
@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class JwtAuthenticationGatewayFilter implements WebFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationGatewayFilter.class);
+    // private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationGatewayFilter.class);
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -39,9 +39,10 @@ public class JwtAuthenticationGatewayFilter implements WebFilter {
         String path = exchange.getRequest().getURI().getPath();
 
         // Allow public endpoints
-        if (path.startsWith("/auth/login") || path.startsWith("/auth/register") || path.startsWith("/eureka/")|| path.startsWith("/product/")) {
+        if (path.startsWith("/auth/login") || path.startsWith("/auth/register")|| path.startsWith("/auth/admin/v1/register") || path.startsWith("/eureka/")) {
             return chain.filter(exchange);
         }
+
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
@@ -58,6 +59,14 @@ public class JwtAuthenticationGatewayFilter implements WebFilter {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 DataBuffer buffer = exchange.getResponse()
                         .bufferFactory().wrap("Token expired".getBytes(StandardCharsets.UTF_8));
+                return exchange.getResponse().writeWith(Mono.just(buffer));
+            }
+         
+            boolean role = jwtUtil.extractUserRole(token);
+            if( !role && path.startsWith("/product/addProduct")||(role  && !path.startsWith("/product/addProduct"))){
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
+                DataBuffer buffer = exchange.getResponse()
+                        .bufferFactory().wrap("Access Denied".getBytes(StandardCharsets.UTF_8));
                 return exchange.getResponse().writeWith(Mono.just(buffer));
             }
 

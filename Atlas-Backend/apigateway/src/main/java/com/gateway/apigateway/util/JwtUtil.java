@@ -32,7 +32,10 @@ public class JwtUtil {
     public UUID extractUserId(String token) {
         return UUID.fromString(extractAllClaims(token).getSubject());
     }
-
+    // extract role
+    public Boolean extractUserRole(String token) {
+        return extractAllClaims(token).get("role", Boolean.class);
+    }
     // check Token expiration
     public boolean isTokenExpired(String token) {
         return extractAllClaims(token).getExpiration().before(new Date());

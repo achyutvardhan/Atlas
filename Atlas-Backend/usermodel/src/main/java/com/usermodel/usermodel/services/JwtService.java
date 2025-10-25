@@ -20,10 +20,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    public String generateToken(UUID userID, String userName , String email){
+    public String generateToken(UUID userID, String userName , String email , boolean role) {
         Map<String , Object> claims = new HashMap<>();
         claims.put("username", userName);
         claims.put("email" , email);
+        claims.put("role" , role);
         return Jwts.builder()
                .claims(claims)
                .subject(userID.toString())

@@ -1,6 +1,5 @@
 package com.usermodel.usermodel.model;
 
-import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +32,7 @@ public class User {
     private String userName;
     private String password;
     private String token;
+    private boolean role; // true for admin, false for regular user
     @OneToOne(cascade = CascadeType.ALL)
     private UserDetails userDetails;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

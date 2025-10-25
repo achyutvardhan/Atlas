@@ -69,6 +69,20 @@ public class userService {
         newUser.setUserDetails(user.getUserDetails());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         newUser.setUserName(user.getUserName());
+        newUser.setRole(false);
+        return userRepo.save(newUser);
+    }
+
+    public User registerAdminProfile(User user) {
+        User existingUser = userRepo.findByUserName(user.getUserName());
+        if (existingUser != null)
+            return existingUser;
+        User newUser = new User();
+        newUser.setAddress(new ArrayList<>());
+        newUser.setUserDetails(user.getUserDetails());
+        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        newUser.setUserName(user.getUserName());
+        newUser.setRole(true); // Set role to true for admin
         return userRepo.save(newUser);
     }
 
@@ -79,7 +93,7 @@ public class userService {
         User user = userRepo.findByUserName(username);
         if (user != null) {
             LoginResponse lr = new LoginResponse();
-            String token = jwtService.generateToken(user.getUserId(), user.getUserName(), user.getUserDetails().getEmail());
+            String token = jwtService.generateToken(user.getUserId(), user.getUserName(), user.getUserDetails().getEmail(),user.isRole());
             user.setToken(token);
             lr.setToken(token);
             lr.setMessage("Login Successful");

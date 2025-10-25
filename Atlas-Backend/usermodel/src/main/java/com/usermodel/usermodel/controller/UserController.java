@@ -46,6 +46,13 @@ public class UserController {
         System.out.println("hey there");
         return ResponseEntity.status(HttpStatus.SC_CREATED).body(newUser);
     }
+// Admin registration API can be added similarly
+   @PostMapping("/admin/v1/register")
+    public ResponseEntity<User> registerAdminProfile(@RequestBody User user){
+        User newUser = userService.registerAdminProfile(user);
+        System.out.println("hey there");
+        return ResponseEntity.status(HttpStatus.SC_CREATED).body(newUser);
+    }
 
 // Login API
     @PostMapping("/login")

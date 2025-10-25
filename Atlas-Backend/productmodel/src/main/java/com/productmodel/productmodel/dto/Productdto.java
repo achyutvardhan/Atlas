@@ -1,8 +1,6 @@
 package com.productmodel.productmodel.dto;
 
-import java.sql.Date;
 import java.util.List;
-import java.util.UUID;
 
 import com.productmodel.productmodel.model.Images;
 
