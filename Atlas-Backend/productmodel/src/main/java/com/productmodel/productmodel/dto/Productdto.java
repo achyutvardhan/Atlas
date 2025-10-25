@@ -10,12 +10,10 @@ import lombok.Data;
 
 @Data
 public class Productdto {
-     private UUID productId;
     private String productName;
     private int productQuantity;
     private boolean inStock;
     private int productRating;
-    private Date productDoa;
     private int price;
     private String description;
     private String category;

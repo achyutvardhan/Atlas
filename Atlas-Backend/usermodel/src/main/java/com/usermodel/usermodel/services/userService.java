@@ -111,12 +111,14 @@ public class userService {
         address.setStreet(adr.getStreet());
         address.setCity(adr.getCity());
         address.setState(adr.getState());
+        address.setPincode(adr.getPincode());
         user.getAddress().add(address);
         userRepo.save(user);
         AddressResponse adrep = new AddressResponse();
         adrep.setStreet(address.getStreet());
         adrep.setCity(address.getCity());
         adrep.setState(address.getState());
+        adrep.setPincode(address.getPincode());
         return adrep;
     }
 

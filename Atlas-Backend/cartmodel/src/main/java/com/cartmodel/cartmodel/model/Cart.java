@@ -27,7 +27,7 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID cartId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CartItems> cartItems ;
-    private UUID usersId;
-     
+    private List<CartItems> cartItems;
+    private UUID userId;
+
 }

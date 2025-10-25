@@ -6,6 +6,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,63 +31,59 @@ public class CartService {
     @Autowired
     private ModelMapper modelMapper;
 
-     public String checkToken(String authHeader){
-        String token = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7); 
-        } else {
-            return null;
-        }
-        return token;
-    }
+    //  public String checkToken(String authHeader){
+    //     String token = null;
+    //     if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    //         token = authHeader.substring(7); 
+    //     } else {
+    //         return null;
+    //     }
+    //     return token;
+    // }
+    private static final Logger logger = LoggerFactory.getLogger(CartService.class);
 
-    public List<cartResponse> getAllCartItem(String authHeader) {
-        String token = checkToken(authHeader);
-        if(token == null) return null;
-        // get userId from token and set to cartRequest
-        Cart carts = cartRepo.findByUserId().orElse(null); // userID from token
-        if(carts == null || carts.getCartItems() == null) return new ArrayList<>();
+    public List<cartResponse> getAllCartItem(String userId ,UUID cartId) {
+        UUID userid = UUID.fromString(userId);
+        Cart carts = cartRepo.findByUserId(userid); // userID from token
+        if(carts == null || carts.getCartItems().isEmpty() || !carts.getCartId().equals(cartId) ) return null;
+
         List<cartResponse> cartResponses = carts.getCartItems().stream().map(
                 cartItem -> {
                     cartResponse cartResponse = modelMapper.map(cartItem, cartResponse.class);
+                    cartResponse.setCartId(carts.getCartId());
                     return cartResponse;
                 }).collect(Collectors.toList());
 
         return cartResponses;
     }
 
-    public boolean removeFromCart(String authHeader,UUID cartId, UUID cartItemId) {
-        String token = checkToken(authHeader);
-        if(token == null) return false;
+    public boolean removeFromCart(String userId,UUID cartId, UUID cartItemId) {
+         UUID userid = UUID.fromString(userId);
         // get userId from token and set to cartRequest
-        Cart cart = cartRepo.findById(cartId).orElse(null);
-         if(cart == null || cart.getCartItems() == null) return false;
+        Cart cart = cartRepo.findByUserId(userid); 
+         if(cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId)) return false;
         boolean removed = cart.getCartItems().removeIf(item -> item.getCartItemsId().equals(cartItemId));
         if(removed) cartRepo.save(cart);
         return removed;
     }
 
-    public boolean clearCart(String authHeader,UUID cartId) {
-        String token = checkToken(authHeader);
-        if(token == null) return false;
-        // get userId from token 
-        Cart cart = cartRepo.findById(cartId).orElse(new Cart());
-        if(cart.getUsersId() != /* userID from token */) return false;
-        if(cart == null || cart.getCartItems() == null) return false;
+    public boolean clearCart(String userId,UUID cartId) {
+        UUID userid = UUID.fromString(userId);
+        Cart cart = cartRepo.findByUserId(cartId);
+        if(cart.getUserId() != userid) return false;
+        if(cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId)) return false;
         if(cart.getCartItems().isEmpty()) return true;
         cart.getCartItems().clear();
         cartRepo.save(cart);
         return true;
     }
 
-    public cartResponse addToCart(String authHeader,cartRequest cartRequest) {
-        String token = checkToken(authHeader);
-        if(token == null) return null;
-        // get userId from token and set to cartRequest
-        Cart cart = cartRepo.findById(cartRequest.getCartId()).orElse(null);
+    public cartResponse addToCart(String userId,cartRequest cartRequest) {
+        UUID userid = UUID.fromString(userId);
+        Cart cart = cartRepo.findByUserId(userid);
         if (cart == null) {
             cart = new Cart();
-            cart.setUsersId(); // userID from token
+            cart.setUserId(userid); 
             cart.setCartItems(new ArrayList<>());
         } else if (cart.getCartItems() == null) {
             cart.setCartItems(new ArrayList<>());
@@ -97,8 +95,7 @@ public class CartService {
         if (existing != null) {
             existing.setQuantityAdded(existing.getQuantityAdded() + cartRequest.getQuantityAdded());
         } else {
-            CartItems cartItem = modelMapper.map(cartRequest, CartItems.class);
-            cartItem.setCartItemsId(null); 
+            CartItems cartItem = modelMapper.map(cartRequest, CartItems.class); 
             cart.getCartItems().add(cartItem);
         }
 
@@ -112,18 +109,18 @@ public class CartService {
         if (returnedItem == null)
             return null;
         cartResponse resp = modelMapper.map(returnedItem, cartResponse.class);
+        resp.setCartId(saved.getCartId());
         return resp;
     }
 
 
-    public orderResponse checkoutCart(String authHeader,UUID cartId)
+    public orderResponse checkoutCart(String userId,UUID cartId)
     {
-        String token = checkToken(authHeader);
-        if(token == null) return null;
-        // get userId from token
-        orderResponse dto = orderClient.placeOrder(cartId);
+        UUID userid = UUID.fromString(userId);
+        Cart cart = cartRepo.findByUserId(userid);
+        if(cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId)) return null;
+        orderResponse dto = orderClient.placeOrder(userid ,cartId);
         if(dto == null) return null;
-        Cart cart = cartRepo.findById(cartId).orElse(null);
         cartRepo.delete(cart);
         return dto;
     }

@@ -7,7 +7,9 @@ import lombok.Data;
 
 @Data
 public class cartResponse {
-    private UUID cartItemsId;
     private int QuantityAdded;
     private UUID productId;
+    private UUID cartId;
+    private String productName;
+    private UUID cartItemsId;
 }

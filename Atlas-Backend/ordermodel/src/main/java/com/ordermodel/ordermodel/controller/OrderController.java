@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,24 +22,24 @@ public class OrderController {
     private OrderService orderService;
 
     //place order
-    @PostMapping("/place-order")
-    public ResponseEntity<orderResponse> placeOrder(@RequestBody UUID cartId){
-        orderResponse orderResponse = orderService.placeOrder(cartId);
+    @GetMapping("/{userId}/place-order/{cartId}")
+    public ResponseEntity<orderResponse> placeOrder(@PathVariable("userId") UUID userId ,@PathVariable("cartId") UUID cartId){
+        orderResponse orderResponse = orderService.placeOrder(userId ,cartId);
         if(orderResponse==null) return ResponseEntity.status(400).build();
         return ResponseEntity.ok(orderResponse);
     }
     //get all orders of user by id
     @GetMapping("/get-all-order-by-id")
-    public ResponseEntity<orderResponse> getAllOrderById(@RequestHeader(name = "Authorization") String authHeader){
-        orderResponse orderResponse = orderService.getAllOrderById(authHeader);
+    public ResponseEntity<orderResponse> getAllOrderById(@RequestHeader(name = "X-USER-ID") String userId){
+        orderResponse orderResponse = orderService.getAllOrderById(userId);
         if(orderResponse==null) return ResponseEntity.status(404).build();
         return ResponseEntity.ok(orderResponse);
     }
 
     //cancel order
     @GetMapping("/cancel-order/{id}")
-    public ResponseEntity<orderResponse> cancelOrder(@RequestHeader(name = "Authorization") String authHeader,@PathVariable UUID orderId){
-        orderResponse orderResponse = orderService.cancelOrder(authHeader,orderId);
+    public ResponseEntity<orderResponse> cancelOrder(@RequestHeader(name = "X-USER-ID") String userId,@PathVariable UUID orderId){
+        orderResponse orderResponse = orderService.cancelOrder(userId,orderId);
         if(orderResponse==null) return ResponseEntity.status(400).build();
         return ResponseEntity.ok(orderResponse);
     }

@@ -7,6 +7,9 @@ import lombok.Data;
 @Data
 public class OrderProdDto {
     private UUID ordProdId;
-    private int quantity;
-    private int priceAtPurchase;
+    private String productName;
+    private int QuantityAdded;
+    private int price;
+    private String description;
+    private String category;
 }

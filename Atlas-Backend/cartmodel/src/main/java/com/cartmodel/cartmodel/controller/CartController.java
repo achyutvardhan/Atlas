@@ -28,18 +28,18 @@ public class CartController {
 
     // addtocart
     @PostMapping("/add-to-cart")
-    public ResponseEntity<cartResponse> addToCart(@RequestHeader(name = "Authorization") String authHeader,@RequestBody cartRequest cartRequest) {
-        cartResponse response = cartService.addToCart(authHeader , cartRequest);
+    public ResponseEntity<cartResponse> addToCart(@RequestHeader(name = "X-USER-ID") String userId,@RequestBody cartRequest cartRequest) {
+        cartResponse response = cartService.addToCart(userId , cartRequest);
         if (response == null) {
             return ResponseEntity.status(400).body(null);
         }
         return ResponseEntity.ok(response);
     }
 
-    // removefromcart
+    // removefromcart #
     @DeleteMapping("/{cartId}/items/{cartItemId}")
-    public ResponseEntity<String> removeFromCart(@RequestHeader(name = "Authorization") String authHeader,@PathVariable("cartId") UUID cartId, @PathVariable("cartItemId") UUID cartItemId) {
-        boolean response = cartService.removeFromCart(authHeader,cartId, cartItemId);
+    public ResponseEntity<String> removeFromCart(@RequestHeader(name = "X-USER-ID") String userId,@PathVariable("cartId") UUID cartId, @PathVariable("cartItemId") UUID cartItemId) {
+        boolean response = cartService.removeFromCart(userId,cartId, cartItemId);
         if (response == false) {
             return ResponseEntity.status(400).body("Item not found in cart");
         }
@@ -48,15 +48,17 @@ public class CartController {
 
     // getcart
     @GetMapping("/{cartId}")
-    public ResponseEntity<List<cartResponse>> getAllCartItem(@RequestHeader(name = "Authorization") String authHeader,@PathVariable UUID cartId) {
-        List<cartResponse> response = cartService.getAllCartItem(authHeader,cartId);
+    public ResponseEntity<List<cartResponse>> getAllCartItem(@RequestHeader(name = "X-USER-ID") String userId,@PathVariable("cartId") UUID cartId) {
+        List<cartResponse> response = cartService.getAllCartItem(userId,cartId);
+        if(response == null)
+        return ResponseEntity.status(400).build();
         return ResponseEntity.ok(response);
     }
 
     // clearcart
     @GetMapping("/clear/{id}")
-    public ResponseEntity<String> clearCart(@RequestHeader(name = "Authorization") String authHeader,@RequestBody UUID cartId) {
-        boolean response = cartService.clearCart(authHeader,cartId);
+    public ResponseEntity<String> clearCart(@RequestHeader(name = "X-USER-ID") String userId,@RequestBody UUID cartId) {
+        boolean response = cartService.clearCart(userId,cartId);
         if (response == false) {
             return ResponseEntity.status(400).body("Cart not found");
         }
@@ -64,9 +66,9 @@ public class CartController {
     }
     // checkout
     @GetMapping("/checkout/{cartId}")
-    public ResponseEntity<orderResponse> checkoutCart(@RequestHeader(name = "Authorization") String authHeader,@PathVariable("cartId") UUID cartId)
+    public ResponseEntity<orderResponse> checkoutCart(@RequestHeader(name = "X-USER-ID") String userId,@PathVariable("cartId") UUID cartId)
     {
-        orderResponse dto = cartService.checkoutCart(authHeader ,cartId);
+        orderResponse dto = cartService.checkoutCart(userId ,cartId);
         if(dto == null)
         return ResponseEntity.notFound().build();
         return ResponseEntity.ok(dto);

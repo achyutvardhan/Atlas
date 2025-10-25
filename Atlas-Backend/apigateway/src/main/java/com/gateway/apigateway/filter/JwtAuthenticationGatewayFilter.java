@@ -39,7 +39,7 @@ public class JwtAuthenticationGatewayFilter implements WebFilter {
         String path = exchange.getRequest().getURI().getPath();
 
         // Allow public endpoints
-        if (path.startsWith("/auth/login") || path.startsWith("/auth/register") || path.startsWith("/eureka/")) {
+        if (path.startsWith("/auth/login") || path.startsWith("/auth/register") || path.startsWith("/eureka/")|| path.startsWith("/product/")) {
             return chain.filter(exchange);
         }
 

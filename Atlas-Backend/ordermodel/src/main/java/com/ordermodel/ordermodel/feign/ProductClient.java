@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.ordermodel.ordermodel.dto.ProductDto;
 
-@FeignClient(name = "productmodel" , path = "/products")
+@FeignClient(name = "productmodel" , path = "/product")
 public interface ProductClient {
     @GetMapping("/{id}")
     public ProductDto getProductById(@PathVariable("id") UUID id);

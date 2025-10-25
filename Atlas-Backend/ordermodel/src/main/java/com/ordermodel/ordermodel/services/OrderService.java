@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.ordermodel.ordermodel.dto.ProductDto;
 import com.ordermodel.ordermodel.dto.orderRequest;
@@ -17,6 +18,7 @@ import com.ordermodel.ordermodel.model.Order;
 import com.ordermodel.ordermodel.model.OrderProd;
 import com.ordermodel.ordermodel.repo.OrderRepo;
 
+@Service
 public class OrderService {
     
     @Autowired
@@ -41,8 +43,8 @@ public class OrderService {
         return token;
     }
 
-    public orderResponse placeOrder(UUID cartId) {
-        List<orderRequest> orderRequests = cartClient.getAllCartItem(cartId);
+    public orderResponse placeOrder(UUID userId , UUID cartId) {
+        List<orderRequest> orderRequests = cartClient.getAllCartItem(userId.toString(),cartId);
          List<OrderProd> savedOrders = new ArrayList<>();
         orderRequests.forEach(product -> {
             ProductDto productdto = ProductClient.getProductById(product.getProductId());
@@ -54,29 +56,25 @@ public class OrderService {
         newOrder.setOrderProds(savedOrders);
         newOrder.setOrderedDate(new Date(System.currentTimeMillis()));
         newOrder.setStatus(true);
-        // newOrder.setUsersId();  // get this from token
+        newOrder.setUserId(userId);  
         orderRepo.save(newOrder);
         orderResponse orderResponses = modelMapper.map(newOrder, orderResponse.class);
         return orderResponses;
     }
 
-    public orderResponse getAllOrderById(String authHeader){
-        String token = checkToken(authHeader);
-        if(token == null) return null;
-        // get userId from token
-        Order order = orderRepo.findByUserId().orElse(null);  // use userId to get all orders
+    public orderResponse getAllOrderById(String userId){
+        UUID userid = UUID.fromString(userId);
+
+        Order order = orderRepo.findByUserId(userid);  // use userId to get all orders
         if(order == null) return null;
         orderResponse orderResponse = modelMapper.map(order, orderResponse.class);
         return orderResponse;
     }
 
-    public orderResponse cancelOrder(String authHeader,UUID orderId){
-        String token = checkToken(authHeader);
-        if(token == null) return null;
-        // get userId from token
+    public orderResponse cancelOrder(String userId,UUID orderId){
+        UUID userid = UUID.fromString(userId);
         Order order = orderRepo.findById(orderId).orElse(null);
-        if(order.getUsersId() != {}) return null; // check if order belongs to user
-        if (order == null)return null;
+        if(order == null || order.getUserId() != userid) return null; // check if order belongs to user
         order.setStatus(false);
         order.setCancelled(true);
         orderRepo.save(order);

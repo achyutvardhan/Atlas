@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 import com.cartmodel.cartmodel.model.Cart;
 
 @Repository
-public interface CartRepo extends JpaRepository<Cart,UUID> {
+public interface CartRepo extends JpaRepository<Cart, UUID> {
     Cart findByUserId(UUID userId);
 }

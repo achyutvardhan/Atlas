@@ -1,5 +1,6 @@
 package com.productmodel.productmodel.services;
 
+import java.sql.Date;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -46,8 +47,9 @@ public class ProductService {
     public Productdto addProduct(Productdto productdto) {
         Product product = modelMapper.map(productdto, Product.class);
         if (product == null)
-            return null;
-            Product saved = productRepository.save(product);
+        return null;
+        product.setProductDoa(new Date(System.currentTimeMillis()));
+        Product saved = productRepository.save(product);
         return modelMapper.map(saved, Productdto.class);
     }
 }

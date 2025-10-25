@@ -29,7 +29,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID orderId;
-    private UUID usersId;
+    private UUID userId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderProd> orderProds;
     private Date orderedDate;

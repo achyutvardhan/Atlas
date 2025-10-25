@@ -35,7 +35,6 @@ public class User {
     private String token;
     @OneToOne(cascade = CascadeType.ALL)
     private UserDetails userDetails;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> address;
 
