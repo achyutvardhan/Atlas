@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.netflix.discovery.converters.Auto;
 import com.usermodel.usermodel.dto.AddressRequest;
 import com.usermodel.usermodel.dto.AddressResponse;
 import com.usermodel.usermodel.dto.LoginResponse;
