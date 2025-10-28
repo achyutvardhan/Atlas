@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.usermodel.usermodel.dto.LoginRequest;
 import com.usermodel.usermodel.dto.LoginResponse;
 import com.usermodel.usermodel.dto.ProfileResponse;
+import com.usermodel.usermodel.dto.RegistrationResponse;
 import com.usermodel.usermodel.dto.userDTO;
 import com.usermodel.usermodel.model.User;
 import com.usermodel.usermodel.services.userService;
@@ -41,15 +43,15 @@ public class UserController {
     
 //    Users Registration API
     @PostMapping("/register")
-    public ResponseEntity<User> registerProfile(@RequestBody User user){
-        User newUser = userService.registerProfile(user);
+    public ResponseEntity<RegistrationResponse> registerProfile(@RequestBody User user){
+        RegistrationResponse newUser = userService.registerProfile(user);
         System.out.println("hey there");
         return ResponseEntity.status(HttpStatus.SC_CREATED).body(newUser);
     }
 // Admin registration API can be added similarly
    @PostMapping("/admin/v1/register")
-    public ResponseEntity<User> registerAdminProfile(@RequestBody User user){
-        User newUser = userService.registerAdminProfile(user);
+    public ResponseEntity<RegistrationResponse> registerAdminProfile(@RequestBody User user){
+        RegistrationResponse newUser = userService.registerAdminProfile(user);
         System.out.println("hey there");
         return ResponseEntity.status(HttpStatus.SC_CREATED).body(newUser);
     }
@@ -78,4 +80,16 @@ public class UserController {
     return ResponseEntity.accepted().body(userDetails);
 
    }
+
+// verify email API
+   @GetMapping("/verify-email")
+   public ResponseEntity<String> verifyEmail(@RequestParam String code , @RequestHeader(name = "X-USER-ID") String userId){
+    boolean isVerified = userService.verifyEmail(code , userId);
+    if(isVerified){
+        return ResponseEntity.ok("Email verified successfully.");
+    } else {
+        return ResponseEntity.status(HttpStatus.SC_BAD_REQUEST).body("Invalid verification code.");
+    }
+   }
+
 }

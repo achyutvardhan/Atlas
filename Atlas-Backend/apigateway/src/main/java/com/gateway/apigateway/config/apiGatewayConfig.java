@@ -19,6 +19,8 @@ public class apiGatewayConfig {
                         .uri("http://localhost:8082"))
                 .route("cartmodel", r -> r.path("/cart/**")
                         .uri("http://localhost:8081"))
+                .route("sendemailservice", r -> r.path("/email/**")
+                        .uri("http://localhost:8087"))
                 .build();
 
     }

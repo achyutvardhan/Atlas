@@ -17,6 +17,7 @@
            <module>usermodel</module>
            <module>cartmodel</module>
            <module>paymentgateway</module>
+           <module>sendemailservice</module>
     </modules>
 
     <dependencyManagement>

@@ -8,15 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.netflix.discovery.converters.Auto;
 import com.usermodel.usermodel.dto.AddressRequest;
 import com.usermodel.usermodel.dto.AddressResponse;
 import com.usermodel.usermodel.dto.LoginResponse;
+import com.usermodel.usermodel.dto.MailDto;
+import com.usermodel.usermodel.dto.MailResponse;
 import com.usermodel.usermodel.dto.ProfileResponse;
+import com.usermodel.usermodel.dto.RegistrationResponse;
 import com.usermodel.usermodel.dto.userDTO;
+import com.usermodel.usermodel.feign.SendEmailClient;
 import com.usermodel.usermodel.model.Address;
 import com.usermodel.usermodel.model.User;
 import com.usermodel.usermodel.repo.UserRepository;
-
 
 @Service
 public class userService {
@@ -29,6 +33,9 @@ public class userService {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private SendEmailClient sendEmailClient;
 
     public userDTO getUserById(UUID id) {
         User user = userRepo.findById(id).orElse(null);
@@ -51,39 +58,116 @@ public class userService {
     }
 
     // public String checkToken(String authHeader) {
-    //     String token = null;
-    //     if (authHeader != null && authHeader.startsWith("Bearer ")) {
-    //         token = authHeader.substring(7);
-    //     } else {
-    //         return null;
-    //     }
-    //     return token;
+    // String token = null;
+    // if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    // token = authHeader.substring(7);
+    // } else {
+    // return null;
+    // }
+    // return token;
     // }
 
-    public User registerProfile(User user) {
+    public RegistrationResponse registerProfile(User user) {
         User existingUser = userRepo.findByUserName(user.getUserName());
-        if (existingUser != null)
-            return existingUser;
+        if (existingUser != null) {
+            RegistrationResponse resp = new RegistrationResponse();
+            resp.setMessage("User already exists");
+            return resp;
+        }
         User newUser = new User();
         newUser.setAddress(new ArrayList<>());
         newUser.setUserDetails(user.getUserDetails());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         newUser.setUserName(user.getUserName());
         newUser.setRole(false);
-        return userRepo.save(newUser);
+        newUser.setVarified(false);
+
+        String verificationToken = UUID.randomUUID().toString();
+        newUser.setVerificationCode(verificationToken);
+        userRepo.save(newUser);
+        MailDto mailDto = new MailDto();
+        mailDto.setTo(newUser.getUserDetails().getEmail());
+        mailDto.setSubject("Please verify your email");
+        mailDto.setMessage("Click the link to verify your email: http://localhost:8080/auth/verify-email?code="
+                + verificationToken);
+        MailResponse mailResponse = sendEmailClient.sendMail(mailDto);
+        if (mailResponse.isStatus()) {
+            RegistrationResponse resp = new RegistrationResponse();
+            resp.setMessage(
+                    "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
+            resp.setUserId(newUser.getUserId());
+            resp.setUserName(newUser.getUserName());
+            resp.setPassword(user.getPassword());
+            resp.setVerificationCode(verificationToken);
+            resp.setVarified(newUser.isVarified());
+            resp.setUserDetails(newUser.getUserDetails());
+            resp.setAddress(resp.getAddress());
+            return resp;
+        } else {
+            RegistrationResponse resp = new RegistrationResponse();
+            resp.setMessage("User registered successfully. However, failed to send verification email to "
+                    + newUser.getUserDetails().getEmail());
+            resp.setUserId(newUser.getUserId());
+            resp.setUserName(newUser.getUserName());
+            resp.setPassword(user.getPassword());
+            resp.setVerificationCode(verificationToken);
+            resp.setVarified(newUser.isVarified());
+            resp.setUserDetails(newUser.getUserDetails());
+            resp.setAddress(resp.getAddress());
+            return resp;
+        }
+
     }
 
-    public User registerAdminProfile(User user) {
+    public RegistrationResponse registerAdminProfile(User user) {
         User existingUser = userRepo.findByUserName(user.getUserName());
-        if (existingUser != null)
-            return existingUser;
+        if (existingUser != null) {
+            RegistrationResponse resp = new RegistrationResponse();
+            resp.setMessage("User already exists");
+            return resp;
+        }
         User newUser = new User();
         newUser.setAddress(new ArrayList<>());
         newUser.setUserDetails(user.getUserDetails());
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         newUser.setUserName(user.getUserName());
         newUser.setRole(true); // Set role to true for admin
-        return userRepo.save(newUser);
+        newUser.setVarified(false);
+
+        String verificationToken = UUID.randomUUID().toString();
+        newUser.setVerificationCode(verificationToken);
+        userRepo.save(newUser);
+        MailDto mailDto = new MailDto();
+        mailDto.setTo(newUser.getUserDetails().getEmail());
+        mailDto.setSubject("Please verify your email");
+        mailDto.setMessage("Click the link to verify your email: http://localhost:8080/auth/verify-email?code="
+                + verificationToken);
+        MailResponse mailResponse = sendEmailClient.sendMail(mailDto);
+        if (mailResponse.isStatus()) {
+            RegistrationResponse resp = new RegistrationResponse();
+            resp.setMessage(
+                    "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
+            resp.setUserId(newUser.getUserId());
+            resp.setUserName(newUser.getUserName());
+            resp.setPassword(user.getPassword());
+            resp.setVerificationCode(verificationToken);
+            resp.setVarified(newUser.isVarified());
+            resp.setUserDetails(newUser.getUserDetails());
+            resp.setAddress(resp.getAddress());
+            return resp;
+        } else {
+            RegistrationResponse resp = new RegistrationResponse();
+            resp.setMessage("User registered successfully. However, failed to send verification email to "
+                    + newUser.getUserDetails().getEmail());
+            resp.setUserId(newUser.getUserId());
+            resp.setUserName(newUser.getUserName());
+            resp.setPassword(user.getPassword());
+            resp.setVerificationCode(verificationToken);
+            resp.setVarified(newUser.isVarified());
+            resp.setUserDetails(newUser.getUserDetails());
+            resp.setAddress(resp.getAddress());
+            return resp;
+        }
     }
 
     public LoginResponse loginUser(String username, String password) {
@@ -91,15 +175,38 @@ public class userService {
         if (!isAuthenticated)
             return new LoginResponse();
         User user = userRepo.findByUserName(username);
-        if (user != null) {
+        if (user != null && user.isVarified()) {
             LoginResponse lr = new LoginResponse();
-            String token = jwtService.generateToken(user.getUserId(), user.getUserName(), user.getUserDetails().getEmail(),user.isRole());
+            String token = jwtService.generateToken(user.getUserId(), user.getUserName(),
+                    user.getUserDetails().getEmail(), user.isRole());
             user.setToken(token);
             lr.setToken(token);
             lr.setMessage("Login Successful");
             return lr;
-        } else
-            return new LoginResponse();
+        } else {
+            if (user == null) {
+                LoginResponse lr = new LoginResponse();
+                lr.setMessage("User not found");
+                return lr;
+            }else {
+                LoginResponse lr = new LoginResponse();
+                lr.setMessage("Email not verified. Please verify your email before logging in.");
+                return lr;
+            }
+        }
+    }
+
+    public boolean verifyEmail(String code , String userId) {
+        UUID uid = UUID.fromString(userId);
+        User user = userRepo.findByVerificationCode(code);
+        if (user != null && user.getUserId().equals(uid)) {
+            user.setVarified(true);
+            user.setVerificationCode(null); // Clear the verification code after successful verification
+            userRepo.save(user);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public String logoutUser(String token) {

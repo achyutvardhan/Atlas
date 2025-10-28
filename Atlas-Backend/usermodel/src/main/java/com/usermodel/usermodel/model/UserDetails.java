@@ -2,6 +2,7 @@ package com.usermodel.usermodel.model;
 
 import java.util.UUID;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.GeneratedValue;
@@ -24,6 +25,7 @@ public class UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID userDetailsId;
+    @Column(unique = true)
     private String email;
     private String phoneNo;
     // private Date dateOfCreation;
