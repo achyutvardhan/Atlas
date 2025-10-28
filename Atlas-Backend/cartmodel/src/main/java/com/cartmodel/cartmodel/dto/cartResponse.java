@@ -12,4 +12,5 @@ public class cartResponse {
     private UUID cartId;
     private String productName;
     private UUID cartItemsId;
+    private String message;
 }

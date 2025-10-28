@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.productmodel.productmodel.dto.Productdto;
+import com.productmodel.productmodel.dto.updateStockDto;
 import com.productmodel.productmodel.services.ProductService;
 
 @RestController
@@ -30,9 +31,9 @@ public class ProductController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Productdto> getProductById(@PathVariable("id") UUID id) {
-        Productdto dto = productService.getProductById(id);
+    @GetMapping("/{productId}")
+    public ResponseEntity<Productdto> getProductById(@PathVariable("productId") UUID productId) {
+        Productdto dto = productService.getProductById(productId);
         if (dto == null) {
             return ResponseEntity.noContent().build();
         }
@@ -55,4 +56,12 @@ public class ProductController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/udateStock/{productId}/{QuantityOrdered}")
+    public ResponseEntity<updateStockDto> updateStock(@PathVariable("productId") UUID productId,
+            @PathVariable("QuantityOrdered") int QuantityOrdered) {
+        updateStockDto dto = productService.updateStock(productId, QuantityOrdered);
+        if (dto == null)
+            return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(dto);
+    }
 }

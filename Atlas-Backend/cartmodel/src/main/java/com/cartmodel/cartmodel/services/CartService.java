@@ -11,10 +11,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cartmodel.cartmodel.dto.ProductDto;
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
 import com.cartmodel.cartmodel.dto.orderResponse;
 import com.cartmodel.cartmodel.feign.OrderClient;
+import com.cartmodel.cartmodel.feign.ProductClient;
 import com.cartmodel.cartmodel.model.Cart;
 import com.cartmodel.cartmodel.model.CartItems;
 import com.cartmodel.cartmodel.repo.CartRepo;
@@ -29,23 +31,28 @@ public class CartService {
     private OrderClient orderClient;
 
     @Autowired
+    private ProductClient productClient;
+
+    @Autowired
     private ModelMapper modelMapper;
 
-    //  public String checkToken(String authHeader){
-    //     String token = null;
-    //     if (authHeader != null && authHeader.startsWith("Bearer ")) {
-    //         token = authHeader.substring(7); 
-    //     } else {
-    //         return null;
-    //     }
-    //     return token;
+    // public String checkToken(String authHeader){
+    // String token = null;
+    // if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    // token = authHeader.substring(7);
+    // } else {
+    // return null;
     // }
-    // private static final Logger logger = LoggerFactory.getLogger(CartService.class);
+    // return token;
+    // }
+    // private static final Logger logger =
+    // LoggerFactory.getLogger(CartService.class);
 
-    public List<cartResponse> getAllCartItem(String userId ,UUID cartId) {
+    public List<cartResponse> getAllCartItem(String userId, UUID cartId) {
         UUID userid = UUID.fromString(userId);
         Cart carts = cartRepo.findByUserId(userid); // userID from token
-        if(carts == null || carts.getCartItems().isEmpty() || !carts.getCartId().equals(cartId) ) return null;
+        if (carts == null || carts.getCartItems().isEmpty() || !carts.getCartId().equals(cartId))
+            return null;
 
         List<cartResponse> cartResponses = carts.getCartItems().stream().map(
                 cartItem -> {
@@ -53,37 +60,41 @@ public class CartService {
                     cartResponse.setCartId(carts.getCartId());
                     return cartResponse;
                 }).collect(Collectors.toList());
-
         return cartResponses;
     }
 
-    public boolean removeFromCart(String userId,UUID cartId, UUID cartItemId) {
-         UUID userid = UUID.fromString(userId);
+    public boolean removeFromCart(String userId, UUID cartId, UUID cartItemId) {
+        UUID userid = UUID.fromString(userId);
         // get userId from token and set to cartRequest
-        Cart cart = cartRepo.findByUserId(userid); 
-         if(cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId)) return false;
+        Cart cart = cartRepo.findByUserId(userid);
+        if (cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId))
+            return false;
         boolean removed = cart.getCartItems().removeIf(item -> item.getCartItemsId().equals(cartItemId));
-        if(removed) cartRepo.save(cart);
+        if (removed)
+            cartRepo.save(cart);
         return removed;
     }
 
-    public boolean clearCart(String userId,UUID cartId) {
+    public boolean clearCart(String userId, UUID cartId) {
         UUID userid = UUID.fromString(userId);
         Cart cart = cartRepo.findByUserId(cartId);
-        if(cart.getUserId() != userid) return false;
-        if(cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId)) return false;
-        if(cart.getCartItems().isEmpty()) return true;
+        if (cart.getUserId() != userid)
+            return false;
+        if (cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId))
+            return false;
+        if (cart.getCartItems().isEmpty())
+            return true;
         cart.getCartItems().clear();
         cartRepo.save(cart);
         return true;
     }
 
-    public cartResponse addToCart(String userId,cartRequest cartRequest) {
+    public cartResponse addToCart(String userId, cartRequest cartRequest) {
         UUID userid = UUID.fromString(userId);
         Cart cart = cartRepo.findByUserId(userid);
         if (cart == null) {
             cart = new Cart();
-            cart.setUserId(userid); 
+            cart.setUserId(userid);
             cart.setCartItems(new ArrayList<>());
         } else if (cart.getCartItems() == null) {
             cart.setCartItems(new ArrayList<>());
@@ -92,10 +103,46 @@ public class CartService {
                 .filter(ci -> ci.getProductId().equals(cartRequest.getProductId()))
                 .findFirst()
                 .orElse(null);
+        ProductDto productDto = productClient.getProductById(cartRequest.getProductId());
+        if (productDto == null) {
+            cartResponse cartResp = new cartResponse();
+            cartResp.setProductId(cartRequest.getProductId());
+            cartResp.setProductName(cartRequest.getProductName());
+            cartResp.setCartId(cart.getCartId());
+            cartResp.setMessage("Product not found");
+            return cartResp;
+        }
+
+        if (productDto.isInStock() == false) {
+            cartResponse cartResp = new cartResponse();
+            cartResp.setProductId(cartRequest.getProductId());
+            cartResp.setProductName(cartRequest.getProductName());
+            cartResp.setCartId(cart.getCartId());
+            cartResp.setMessage("Product is out of stock");
+            return cartResp;
+        }
+
         if (existing != null) {
+            int availableQuantity = productDto.getProductQuantity() - existing.getQuantityAdded();
+            if (availableQuantity < cartRequest.getQuantityAdded()) {
+                cartResponse cartResp = new cartResponse();
+                cartResp.setProductId(cartRequest.getProductId());
+                cartResp.setProductName(cartRequest.getProductName());
+                cartResp.setCartId(cart.getCartId());
+                cartResp.setMessage("Only " + availableQuantity + " items left in stock");
+                return cartResp;
+            }
             existing.setQuantityAdded(existing.getQuantityAdded() + cartRequest.getQuantityAdded());
         } else {
-            CartItems cartItem = modelMapper.map(cartRequest, CartItems.class); 
+            if (productDto.getProductQuantity() < cartRequest.getQuantityAdded()) {
+                cartResponse cartResp = new cartResponse();
+                cartResp.setProductId(cartRequest.getProductId());
+                cartResp.setProductName(cartRequest.getProductName());
+                cartResp.setCartId(cart.getCartId());
+                cartResp.setMessage("Only " + productDto.getProductQuantity() + " items left in stock");
+                return cartResp;
+            }
+            CartItems cartItem = modelMapper.map(cartRequest, CartItems.class);
             cart.getCartItems().add(cartItem);
         }
 
@@ -113,14 +160,14 @@ public class CartService {
         return resp;
     }
 
-
-    public orderResponse checkoutCart(String userId,UUID cartId)
-    {
+    public orderResponse checkoutCart(String userId, UUID cartId) {
         UUID userid = UUID.fromString(userId);
         Cart cart = cartRepo.findByUserId(userid);
-        if(cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId)) return null;
-        orderResponse dto = orderClient.placeOrder(userid ,cartId);
-        if(dto == null) return null;
+        if (cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId))
+            return null;
+        orderResponse dto = orderClient.placeOrder(userid, cartId);
+        if (dto == null)
+            return null;
         cartRepo.delete(cart);
         return dto;
     }

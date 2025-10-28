@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.productmodel.productmodel.dto.Productdto;
+import com.productmodel.productmodel.dto.updateStockDto;
 import com.productmodel.productmodel.model.Product;
 import com.productmodel.productmodel.repo.ProductRepository;
 
@@ -40,16 +41,37 @@ public class ProductService {
         List<Product> products = productRepository.findAll();
 
         if (products.isEmpty())
-            return  Collections.emptyList();;
+            return Collections.emptyList();
+        ;
         return products.stream().map(p -> modelMapper.map(p, Productdto.class)).toList();
     }
 
     public Productdto addProduct(Productdto productdto) {
         Product product = modelMapper.map(productdto, Product.class);
         if (product == null)
-        return null;
+            return null;
         product.setProductDoa(new Date(System.currentTimeMillis()));
         Product saved = productRepository.save(product);
         return modelMapper.map(saved, Productdto.class);
+    }
+
+    public updateStockDto updateStock(UUID productId, int quantityOrdered) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (product.getProductQuantity() < quantityOrdered) {
+            updateStockDto dto = new updateStockDto();
+            dto.setUpdated(false);
+            dto.setMessage("Insufficient stock");
+            return dto;
+        }
+
+        product.setProductQuantity(product.getProductQuantity() - quantityOrdered);
+        productRepository.save(product);
+
+        updateStockDto dto = new updateStockDto();
+        dto.setUpdated(true);
+        dto.setMessage("Stock updated successfully");
+        return dto;
     }
 }
