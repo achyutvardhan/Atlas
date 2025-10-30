@@ -3,6 +3,8 @@ package com.sendemail.sendemailservice.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,15 +18,11 @@ public class EmailController {
     @Autowired
     private EmailService emailService;
 
-    @GetMapping("/send-mail")
-    public ResponseEntity<MailResponse> sendMail(MailDto mailDto)throws Exception {
+    @PostMapping("/send-mail")
+    public ResponseEntity<MailResponse> sendMail(@RequestBody MailDto mailDto) throws Exception {
         MailResponse mailResponse = emailService.sendMail(mailDto);
-        if (mailResponse.isStatus()) {
-            return ResponseEntity.ok(mailResponse);
-        } else {
-            return ResponseEntity.status(500).body(mailResponse);
-        }
+        return ResponseEntity.ok(mailResponse);
+
     }
-    
 
 }

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,8 @@ public class userService {
 
     @Autowired
     private SendEmailClient sendEmailClient;
+
+    Logger log = LoggerFactory.getLogger(userService.class);
 
     public userDTO getUserById(UUID id) {
         User user = userRepo.findById(id).orElse(null);
@@ -90,6 +94,7 @@ public class userService {
         mailDto.setMessage("Click the link to verify your email: http://localhost:8080/auth/verify-email?code="
                 + verificationToken);
         MailResponse mailResponse = sendEmailClient.sendMail(mailDto);
+        log.info("Mail response status: {}", mailResponse.isStatus());
         if (mailResponse.isStatus()) {
             RegistrationResponse resp = new RegistrationResponse();
             resp.setMessage(
@@ -195,10 +200,9 @@ public class userService {
         }
     }
 
-    public boolean verifyEmail(String code , String userId) {
-        UUID uid = UUID.fromString(userId);
+    public boolean verifyEmail(String code ) {
         User user = userRepo.findByVerificationCode(code);
-        if (user != null && user.getUserId().equals(uid)) {
+        if (user != null) {
             user.setVarified(true);
             user.setVerificationCode(null); // Clear the verification code after successful verification
             userRepo.save(user);

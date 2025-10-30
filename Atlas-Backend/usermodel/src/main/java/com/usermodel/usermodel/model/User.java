@@ -33,7 +33,7 @@ public class User {
     private String password;
     private String token;
     private boolean role; // true for admin, false for regular user
-    private String VerificationCode;
+    private String verificationCode;
     private boolean isVarified;
     @OneToOne(cascade = CascadeType.ALL)
     private UserDetails userDetails;

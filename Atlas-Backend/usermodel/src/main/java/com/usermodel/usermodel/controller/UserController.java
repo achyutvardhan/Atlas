@@ -83,8 +83,8 @@ public class UserController {
 
 // verify email API
    @GetMapping("/verify-email")
-   public ResponseEntity<String> verifyEmail(@RequestParam String code , @RequestHeader(name = "X-USER-ID") String userId){
-    boolean isVerified = userService.verifyEmail(code , userId);
+   public ResponseEntity<String> verifyEmail(@RequestParam String code ){
+    boolean isVerified = userService.verifyEmail(code);
     if(isVerified){
         return ResponseEntity.ok("Email verified successfully.");
     } else {
