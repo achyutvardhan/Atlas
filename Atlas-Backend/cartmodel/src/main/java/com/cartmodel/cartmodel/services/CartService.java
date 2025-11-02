@@ -11,12 +11,14 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.cartmodel.cartmodel.dto.CreateOrderDto;
 import com.cartmodel.cartmodel.dto.ProductDto;
+import com.cartmodel.cartmodel.dto.Userdto;
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
-import com.cartmodel.cartmodel.dto.orderResponse;
-import com.cartmodel.cartmodel.feign.OrderClient;
+import com.cartmodel.cartmodel.feign.PaymentGateway;
 import com.cartmodel.cartmodel.feign.ProductClient;
+import com.cartmodel.cartmodel.feign.UserClient;
 import com.cartmodel.cartmodel.model.Cart;
 import com.cartmodel.cartmodel.model.CartItems;
 import com.cartmodel.cartmodel.repo.CartRepo;
@@ -28,13 +30,16 @@ public class CartService {
     private CartRepo cartRepo;
 
     @Autowired
-    private OrderClient orderClient;
+    private PaymentGateway paymentGateway;
 
     @Autowired
     private ProductClient productClient;
 
     @Autowired
     private ModelMapper modelMapper;
+
+    @Autowired
+    private UserClient userClient;
 
     // public String checkToken(String authHeader){
     // String token = null;
@@ -160,16 +165,39 @@ public class CartService {
         return resp;
     }
 
-    public orderResponse checkoutCart(String userId, UUID cartId) {
-        UUID userid = UUID.fromString(userId);
-        Cart cart = cartRepo.findByUserId(userid);
-        if (cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId))
-            return null;
-        orderResponse dto = orderClient.placeOrder(userid, cartId);
-        if (dto == null)
-            return null;
-        cartRepo.delete(cart);
-        return dto;
+    public String checkoutCart(String userId, UUID cartId , String shippingAddress) throws Exception {
+
+        try {
+            UUID userid = UUID.fromString(userId);
+            Cart cart = cartRepo.findByUserId(userid);
+            if (cart == null || cart.getCartItems() == null || !cart.getCartId().equals(cartId))
+                return "Cart not found";
+            CreateOrderDto orderDto = new CreateOrderDto();
+            orderDto.setAmount(cart.getCartItems().stream()
+                    .mapToInt(item -> {
+                        ProductDto product = productClient.getProductById(item.getProductId());
+                        return item.getQuantityAdded() * product.getPrice();
+                    })
+                    .sum() * 100); // amount in smallest currency unit
+            orderDto.setCurrency("INR");
+            orderDto.setReceiptId(UUID.randomUUID());
+            orderDto.setUserId(userid);
+            orderDto.setCartId(cart.getCartId());
+            // Fetch user details
+            Userdto userDetails = userClient.getUserById(userid);
+            if (userDetails == null) {
+                throw new Exception("User not found");
+            }
+            orderDto.setEmail(userDetails.getEmail());
+            orderDto.setPhoneNumber(userDetails.getPhoneNumber());
+            orderDto.setShippingAddress(shippingAddress);
+            String order = paymentGateway.createOrder(orderDto);
+            cartRepo.delete(cart);
+            return order;
+            
+        } catch (Exception e) {
+            throw new Exception("Error during checkout: " + e.getMessage());
+        }
     }
 
 }

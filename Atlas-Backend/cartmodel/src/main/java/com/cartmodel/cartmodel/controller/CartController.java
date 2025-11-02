@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
-import com.cartmodel.cartmodel.dto.orderResponse;
 import com.cartmodel.cartmodel.services.CartService;
 
 @RestController
@@ -73,11 +72,11 @@ public class CartController {
 
     // checkout
     @GetMapping("/checkout/{cartId}")
-    public ResponseEntity<orderResponse> checkoutCart(@RequestHeader(name = "X-USER-ID") String userId,
-            @PathVariable("cartId") UUID cartId) {
-        orderResponse dto = cartService.checkoutCart(userId, cartId);
-        if (dto == null)
+    public ResponseEntity<String> checkoutCart(@RequestHeader(name = "X-USER-ID") String userId,
+            @PathVariable("cartId") UUID cartId ,@RequestBody String shippingAddress) throws Exception {
+        String order = cartService.checkoutCart(userId, cartId , shippingAddress);
+        if (order == null)
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(order);
     }
 }

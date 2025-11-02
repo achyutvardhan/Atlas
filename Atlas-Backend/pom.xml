@@ -12,12 +12,12 @@
     <modules>
         <module>eurekaserver</module>
         <module>apigateway</module>
-           <module>productmodel</module>
-           <module>ordermodel</module>
-           <module>usermodel</module>
-           <module>cartmodel</module>
-           <module>paymentgateway</module>
-           <module>sendemailservice</module>
+        <module>productmodel</module>
+        <module>ordermodel</module>
+        <module>usermodel</module>
+        <module>cartmodel</module>
+        <module>paymentgateway</module>
+        <module>sendemailservice</module>
     </modules>
 
     <dependencyManagement>

@@ -45,8 +45,8 @@ public class userService {
         if (user == null)
             return new userDTO();
         userDTO userdto = new userDTO();
-        userdto.setUserId(user.getUserId());
-        userdto.setUserName(user.getUserName());
+        userdto.setEmail(user.getUserDetails().getEmail());
+        userdto.setPhoneNumber(user.getUserDetails().getPhoneNo());
         return userdto;
     }
 

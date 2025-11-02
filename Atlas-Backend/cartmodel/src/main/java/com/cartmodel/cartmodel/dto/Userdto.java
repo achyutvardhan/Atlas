@@ -6,6 +6,6 @@ import lombok.Data;
 
 @Data
 public class Userdto {
-    private UUID userId;
-    private String userName;
+    private String email;
+    private String phoneNumber;
 }

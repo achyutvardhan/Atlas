@@ -21,6 +21,8 @@ public class apiGatewayConfig {
                         .uri("http://localhost:8081"))
                 .route("sendemailservice", r -> r.path("/email/**")
                         .uri("http://localhost:8087"))
+                .route("paymentgateway", r -> r.path("/payment/**")
+                        .uri("http://localhost:8086"))
                 .build();
 
     }

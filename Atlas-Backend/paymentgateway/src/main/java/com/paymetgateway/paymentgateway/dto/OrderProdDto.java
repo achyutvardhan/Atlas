@@ -1,4 +1,4 @@
-package com.cartmodel.cartmodel.dto;
+package com.paymetgateway.paymentgateway.dto;
 
 import java.util.UUID;
 
