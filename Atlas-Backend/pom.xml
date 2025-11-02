@@ -12,14 +12,21 @@
     <modules>
         <module>eurekaserver</module>
         <module>apigateway</module>
-           <module>productmodel</module>
-           <module>ordermodel</module>
-           <module>usermodel</module>
-           <module>cartmodel</module>
+        <module>productmodel</module>
+        <module>ordermodel</module>
+        <module>usermodel</module>
+        <module>cartmodel</module>
+        <module>paymentgateway</module>
+        <module>sendemailservice</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>4.2.0</version>
+		    </dependency>
             <!-- Spring Boot BOM -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -44,13 +51,21 @@
                 <artifactId>guava</artifactId>
                 <version>33.0.0-jre</version>
             </dependency>
+            <!-- Lombok version managed centrally -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <properties>
         <java.version>21</java.version>
-        <spring.boot.version>3.3.0</spring.boot.version>
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring.boot.version>3.5.6</spring.boot.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <lombok.version>1.18.30</lombok.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     </properties>
 
     <build>
@@ -60,6 +75,26 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring.boot.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <release>${java.version}</release>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+                        <fork>true</fork>
+                        <executable>${java.home}/bin/javac</executable>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
