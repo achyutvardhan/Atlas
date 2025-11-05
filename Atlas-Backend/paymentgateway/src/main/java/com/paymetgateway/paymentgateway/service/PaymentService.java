@@ -6,7 +6,6 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.razorpay.Utils;
-import com.netflix.discovery.converters.Auto;
 import com.paymetgateway.paymentgateway.dto.CreateOrderDto;
 import com.paymetgateway.paymentgateway.dto.orderResponse;
 import com.paymetgateway.paymentgateway.feign.OrderClient;
@@ -20,8 +19,8 @@ public class PaymentService {
     @Autowired
     private OrderClient orderClient;
 
-    private static final String RAZORPAY_KEY_ID = ;
-    private static final String RAZORPAY_KEY_SECRET = ;
+    private static final String RAZORPAY_KEY_ID = "rzp_test_RaNILUIOsMf2jX" ;
+    private static final String RAZORPAY_KEY_SECRET ="iO0F5Q2KpjMUmzWhrTemo5IJ";
 
     public String createOrder(CreateOrderDto createOrder) throws RazorpayException {
         RazorpayClient razorpay = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
@@ -29,11 +28,14 @@ public class PaymentService {
         orderRequest.put("amount", createOrder.getAmount()); // amount in the smallest currency unit
         orderRequest.put("currency", createOrder.getCurrency());
         orderRequest.put("receipt", createOrder.getReceiptId().toString());
-        orderRequest.put("userId", createOrder.getUserId().toString());
-        orderRequest.put("cartId", createOrder.getCartId().toString());
-        orderRequest.put("shippingAddress", createOrder.getShippingAddress());
-        orderRequest.put("email", createOrder.getEmail());
-        orderRequest.put("phoneNumber", createOrder.getPhoneNumber());
+
+        JSONObject notes = new JSONObject();
+        notes.put("userId", createOrder.getUserId().toString());
+        notes.put("cartId", createOrder.getCartId().toString());
+        notes.put("shippingAddress", createOrder.getShippingAddress());
+        notes.put("email", createOrder.getEmail());
+        notes.put("phonenumber", createOrder.getPhoneNumber());
+        orderRequest.put("notes", notes);
         Order order = razorpay.orders.create(orderRequest);
         return order.toString();
     }

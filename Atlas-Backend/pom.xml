@@ -18,6 +18,7 @@
         <module>cartmodel</module>
         <module>paymentgateway</module>
         <module>sendemailservice</module>
+        <module>sellermodel</module>
     </modules>
 
     <dependencyManagement>

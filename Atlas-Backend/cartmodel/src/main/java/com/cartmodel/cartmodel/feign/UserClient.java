@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.cartmodel.cartmodel.dto.Userdto;
 
-@FeignClient(name = "usermodel" , url = "/auth")
+@FeignClient(name = "usermodel" , path = "/auth")
 public interface UserClient {
     @GetMapping("/{id}")
     public Userdto getUserById(@PathVariable("id") UUID id);
