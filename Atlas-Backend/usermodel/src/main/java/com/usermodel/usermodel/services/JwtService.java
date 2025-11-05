@@ -14,7 +14,7 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-    private static final String SECRET_KEY = "u7D9fX2qLp8sVb3N6kT1hR4cY0mZ5wQg";
+    private static final String SECRET_KEY = "";
 
      private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
