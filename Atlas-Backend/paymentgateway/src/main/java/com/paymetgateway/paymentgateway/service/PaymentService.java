@@ -19,8 +19,8 @@ public class PaymentService {
     @Autowired
     private OrderClient orderClient;
 
-    private static final String RAZORPAY_KEY_ID = "rzp_test_RaNILUIOsMf2jX" ;
-    private static final String RAZORPAY_KEY_SECRET ="iO0F5Q2KpjMUmzWhrTemo5IJ";
+    private static final String RAZORPAY_KEY_ID = "" ;
+    private static final String RAZORPAY_KEY_SECRET ="";
 
     public String createOrder(CreateOrderDto createOrder) throws RazorpayException {
         RazorpayClient razorpay = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
