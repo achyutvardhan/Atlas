@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.razorpay.Utils;
 import com.paymetgateway.paymentgateway.dto.CreateOrderDto;
@@ -18,9 +19,10 @@ public class PaymentService {
 
     @Autowired
     private OrderClient orderClient;
-
-    private static final String RAZORPAY_KEY_ID = "" ;
-    private static final String RAZORPAY_KEY_SECRET ="";
+    @Value("${payment.gateway.apiKey}")
+    private static  String RAZORPAY_KEY_ID ;
+    @Value("${payment.gateway.apiSecret}")
+    private static  String RAZORPAY_KEY_SECRET;
 
     public String createOrder(CreateOrderDto createOrder) throws RazorpayException {
         RazorpayClient razorpay = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
