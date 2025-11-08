@@ -33,7 +33,6 @@ public class UserController {
     @Autowired
     private userService userService;
 
-
     @GetMapping("/{id}")
     public ResponseEntity<userDTO> getUserById(@PathVariable UUID id){
         System.out.println(id);
