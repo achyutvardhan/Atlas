@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,6 @@ import com.usermodel.usermodel.dto.RegistrationResponse;
 import com.usermodel.usermodel.dto.userDTO;
 import com.usermodel.usermodel.model.User;
 import com.usermodel.usermodel.services.userService;
-
 
 
 @RestController

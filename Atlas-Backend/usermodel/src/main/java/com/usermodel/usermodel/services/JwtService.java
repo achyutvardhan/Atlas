@@ -17,7 +17,7 @@ import io.jsonwebtoken.security.Keys;
 public class JwtService {
     
     @Value("${jwt.secret}")
-    private static String SECRET_KEY;
+    private String SECRET_KEY;
 
      private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
