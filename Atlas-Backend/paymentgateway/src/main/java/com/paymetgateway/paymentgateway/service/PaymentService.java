@@ -20,9 +20,9 @@ public class PaymentService {
     @Autowired
     private OrderClient orderClient;
     @Value("${payment.gateway.apiKey}")
-    private static  String RAZORPAY_KEY_ID ;
+    private String RAZORPAY_KEY_ID ;
     @Value("${payment.gateway.apiSecret}")
-    private static  String RAZORPAY_KEY_SECRET;
+    private String RAZORPAY_KEY_SECRET;
 
     public String createOrder(CreateOrderDto createOrder) throws RazorpayException {
         RazorpayClient razorpay = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
