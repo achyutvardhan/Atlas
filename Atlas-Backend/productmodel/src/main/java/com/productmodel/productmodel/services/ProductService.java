@@ -7,6 +7,11 @@ import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import com.productmodel.productmodel.dto.Productdto;
@@ -15,6 +20,7 @@ import com.productmodel.productmodel.model.Product;
 import com.productmodel.productmodel.repo.ProductRepository;
 
 @Service
+@CacheConfig(cacheNames = "products")
 public class ProductService {
     @Autowired
     private ProductRepository productRepository;
@@ -22,6 +28,7 @@ public class ProductService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @CachePut(key = "#category")
     public List<Productdto> getProductsByCategory(String category) {
         List<Product> products = productRepository.findByCategory(category);
         return products.stream()
@@ -29,6 +36,7 @@ public class ProductService {
                 .toList();
     }
 
+    @CachePut(key = "#id")
     public Productdto getProductById(UUID id) {
         Product product = productRepository.findById(id).orElse(null);
         if (product == null)
@@ -36,7 +44,7 @@ public class ProductService {
         Productdto productdto = modelMapper.map(product, Productdto.class);
         return productdto;
     }
-
+    @Cacheable(key = "'all-products'")
     public List<Productdto> getAllProducts() {
         List<Product> products = productRepository.findAll();
 
@@ -45,7 +53,10 @@ public class ProductService {
         ;
         return products.stream().map(p -> modelMapper.map(p, Productdto.class)).toList();
     }
-
+    @Caching(
+        evict = {@CacheEvict(key = "'all-products'", allEntries = true),},
+        put = {@CachePut(key = "'all-products'")}
+    )
     public Productdto addProduct(Productdto productdto) {
         Product product = modelMapper.map(productdto, Product.class);
         if (product == null)
@@ -54,7 +65,11 @@ public class ProductService {
         Product saved = productRepository.save(product);
         return modelMapper.map(saved, Productdto.class);
     }
-
+    
+    @Caching(
+        evict = {@CacheEvict(key = "'all-products'", allEntries = true),},
+        put = {@CachePut(key = "'all-products'")}
+    )
     public updateStockDto updateStock(UUID productId, int quantityOrdered) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
