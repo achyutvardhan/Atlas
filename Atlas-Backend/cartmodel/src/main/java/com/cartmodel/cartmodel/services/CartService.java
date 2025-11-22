@@ -165,7 +165,7 @@ public class CartService {
         return resp;
     }
 
-    public String checkoutCart(String userId, UUID cartId , String shippingAddress) throws Exception {
+    public String checkoutCart(String userId, UUID cartId, String shippingAddress) throws Exception {
 
         try {
             UUID userid = UUID.fromString(userId);
@@ -194,10 +194,11 @@ public class CartService {
             String order = paymentGateway.createOrder(orderDto);
             cartRepo.delete(cart);
             return order;
-            
+
         } catch (Exception e) {
             throw new Exception("Error during checkout: " + e.getMessage());
         }
     }
+
 
 }
