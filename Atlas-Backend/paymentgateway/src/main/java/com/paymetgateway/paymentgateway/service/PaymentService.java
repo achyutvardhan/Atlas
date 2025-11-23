@@ -42,8 +42,7 @@ public class PaymentService {
         return order.toString();
     }
 
-    public boolean verifyPayment(String razorpayOrderId, String razorpayPaymentId, String razorpaySignature,
-            String userId, String cartId) throws RazorpayException {
+    public boolean verifyPayment(String razorpayOrderId, String razorpayPaymentId, String razorpaySignature,String userId, String cartId) throws RazorpayException {
 
         try {
             String payload = razorpayOrderId + '|' + razorpayPaymentId;
