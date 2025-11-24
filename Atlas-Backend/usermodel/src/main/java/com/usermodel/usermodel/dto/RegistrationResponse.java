@@ -15,7 +15,6 @@ public class RegistrationResponse {
     private String password;
     private String token;
     private boolean role; // true for admin, false for regular user
-    private String VerificationCode;
     private boolean isVarified;
     private UserDetails userDetails;
     private List<Address> address;
