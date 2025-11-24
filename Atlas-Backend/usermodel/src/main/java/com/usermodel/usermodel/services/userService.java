@@ -96,34 +96,17 @@ public class userService {
         mailDto.setSubject("Please verify your email");
         mailDto.setMessage("Click the link to verify your email: http://localhost:8080/auth/verify-email?code="
                 + verificationToken);
-        MailResponse mailResponse = sendEmailClient.sendMail(mailDto);
-        log.info("Mail response status: {}", mailResponse.isStatus());
-        if (mailResponse.isStatus()) {
-            RegistrationResponse resp = new RegistrationResponse();
-            resp.setMessage(
+        kafkaProducerService.sendEmailEvent(mailDto);
+        RegistrationResponse resp = new RegistrationResponse();
+        resp.setMessage(
                     "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
-            resp.setUserId(newUser.getUserId());
-            resp.setUserName(newUser.getUserName());
-            resp.setPassword(user.getPassword());
-            resp.setVerificationCode(verificationToken);
-            resp.setVarified(newUser.isVarified());
-            resp.setUserDetails(newUser.getUserDetails());
-            resp.setAddress(resp.getAddress());
-            return resp;
-        } else {
-            RegistrationResponse resp = new RegistrationResponse();
-            resp.setMessage("User registered successfully. However, failed to send verification email to "
-                    + newUser.getUserDetails().getEmail());
-            resp.setUserId(newUser.getUserId());
-            resp.setUserName(newUser.getUserName());
-            resp.setPassword(user.getPassword());
-            resp.setVerificationCode(verificationToken);
-            resp.setVarified(newUser.isVarified());
-            resp.setUserDetails(newUser.getUserDetails());
-            resp.setAddress(resp.getAddress());
-            return resp;
-        }
-
+        resp.setUserId(newUser.getUserId());
+        resp.setUserName(newUser.getUserName());
+        resp.setPassword(user.getPassword());
+        resp.setVarified(newUser.isVarified());
+        resp.setUserDetails(newUser.getUserDetails());
+        resp.setAddress(resp.getAddress());
+        return resp;
     }
 
     public RegistrationResponse registerAdminProfile(User user) {
@@ -150,33 +133,17 @@ public class userService {
         mailDto.setMessage("Click the link to verify your email: http://localhost:8080/auth/verify-email?code="
                 + verificationToken);
         kafkaProducerService.sendEmailEvent(mailDto);
-        // MailResponse mailResponse = sendEmailClient.sendMail(mailDto);
-        // if (mailResponse.isStatus()) {
-        //     RegistrationResponse resp = new RegistrationResponse();
-        //     resp.setMessage(
-        //             "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
-        //     resp.setUserId(newUser.getUserId());
-        //     resp.setUserName(newUser.getUserName());
-        //     resp.setPassword(user.getPassword());
-        //     resp.setVerificationCode(verificationToken);
-        //     resp.setVarified(newUser.isVarified());
-        //     resp.setUserDetails(newUser.getUserDetails());
-        //     resp.setAddress(resp.getAddress());
-        //     return resp;
-        // } else {
-            RegistrationResponse resp = new RegistrationResponse();
-            return resp;
-        //     resp.setMessage("User registered successfully. However, failed to send verification email to "
-        //             + newUser.getUserDetails().getEmail());
-        //     resp.setUserId(newUser.getUserId());
-        //     resp.setUserName(newUser.getUserName());
-        //     resp.setPassword(user.getPassword());
-        //     resp.setVerificationCode(verificationToken);
-        //     resp.setVarified(newUser.isVarified());
-        //     resp.setUserDetails(newUser.getUserDetails());
-        //     resp.setAddress(resp.getAddress());
-        //     return resp;
-        // }
+        RegistrationResponse resp = new RegistrationResponse();
+        resp.setMessage(
+                    "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
+        resp.setUserId(newUser.getUserId());
+        resp.setUserName(newUser.getUserName());
+        resp.setPassword(user.getPassword());
+        resp.setVarified(newUser.isVarified());
+        resp.setUserDetails(newUser.getUserDetails());
+        resp.setAddress(resp.getAddress());
+        return resp;
+
     }
 
     public LoginResponse loginUser(String username, String password) {
