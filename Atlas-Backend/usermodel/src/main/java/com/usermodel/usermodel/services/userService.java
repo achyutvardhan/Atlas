@@ -14,7 +14,6 @@ import com.usermodel.usermodel.dto.AddressRequest;
 import com.usermodel.usermodel.dto.AddressResponse;
 import com.usermodel.usermodel.dto.LoginResponse;
 import com.usermodel.usermodel.dto.MailDto;
-import com.usermodel.usermodel.dto.MailResponse;
 import com.usermodel.usermodel.dto.ProfileResponse;
 import com.usermodel.usermodel.dto.RegistrationResponse;
 import com.usermodel.usermodel.dto.userDTO;
