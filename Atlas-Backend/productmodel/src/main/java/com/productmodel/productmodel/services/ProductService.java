@@ -55,7 +55,7 @@ public class ProductService {
             return Collections.emptyList();
         return products.stream().map(p -> modelMapper.map(p, Productdto.class)).toList();
     }
-
+    
     public Productdto addProduct(Productdto productdto) {
         Product product = modelMapper.map(productdto, Product.class);
         if (product == null)
