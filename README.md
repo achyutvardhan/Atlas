@@ -69,12 +69,7 @@ Build Atlas from the source and install dependencies:
         
     
 3.  **Install the dependencies:**
-    
-
-**Using [npm](https://www.npmjs.com/):**
-
-    ❯ npm install
-    
+   
 
 **Using [maven](https://maven.apache.org/):**
 
@@ -85,24 +80,16 @@ Build Atlas from the source and install dependencies:
 
 Run the project with:
 
-**Using [npm](https://www.npmjs.com/):**
-
-    npm start
-    
 
 **Using [maven](https://maven.apache.org/):**
 
-    mvn exec:java
+    mvn spring-boot:run
     
 
 ### Testing
 
 Atlas uses the {**test\_framework**} test framework. Run the test suite with:
 
-**Using [npm](https://www.npmjs.com/):**
-
-    npm test
-    
 
 **Using [maven](https://maven.apache.org/):**
 
