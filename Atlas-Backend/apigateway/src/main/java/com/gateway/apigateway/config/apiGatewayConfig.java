@@ -21,7 +21,7 @@ public class apiGatewayConfig {
                 return exchange -> Mono.just(
                                 exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
         }
-
+        
         @Bean
         public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
                 return builder.routes()
@@ -33,6 +33,10 @@ public class apiGatewayConfig {
                                                 }))
                                                 .uri("http://localhost:8084"))
                                 .route("productmodel", r -> r.path("/product/**")
+                                                .filters(f -> f.circuitBreaker(c -> {
+                                                        c.setName("productServiceCircuitBreaker");
+                                                        c.setFallbackUri("/fallback/product");
+                                                }))
                                                 .uri("http://localhost:8083"))
                                 .route("ordermodel", r -> r.path("/order/**")
                                                 .uri("http://localhost:8082"))

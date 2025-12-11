@@ -17,7 +17,6 @@ import com.usermodel.usermodel.dto.MailDto;
 import com.usermodel.usermodel.dto.ProfileResponse;
 import com.usermodel.usermodel.dto.RegistrationResponse;
 import com.usermodel.usermodel.dto.userDTO;
-import com.usermodel.usermodel.feign.SendEmailClient;
 import com.usermodel.usermodel.model.Address;
 import com.usermodel.usermodel.model.User;
 import com.usermodel.usermodel.repo.UserRepository;
@@ -34,8 +33,6 @@ public class userService {
     @Autowired
     private JwtService jwtService;
 
-    @Autowired
-    private SendEmailClient sendEmailClient;
 
     @Autowired
     private KafkaProducerService kafkaProducerService;
@@ -101,7 +98,6 @@ public class userService {
                     "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
         resp.setUserId(newUser.getUserId());
         resp.setUserName(newUser.getUserName());
-        resp.setPassword(user.getPassword());
         resp.setVarified(newUser.isVarified());
         resp.setUserDetails(newUser.getUserDetails());
         resp.setAddress(resp.getAddress());
@@ -137,7 +133,6 @@ public class userService {
                     "User registered successfully. Verification email sent to " + newUser.getUserDetails().getEmail());
         resp.setUserId(newUser.getUserId());
         resp.setUserName(newUser.getUserName());
-        resp.setPassword(user.getPassword());
         resp.setVarified(newUser.isVarified());
         resp.setUserDetails(newUser.getUserDetails());
         resp.setAddress(resp.getAddress());
