@@ -17,7 +17,7 @@ import com.cartmodel.cartmodel.dto.Userdto;
 import com.cartmodel.cartmodel.dto.cartRequest;
 import com.cartmodel.cartmodel.dto.cartResponse;
 import com.cartmodel.cartmodel.feign.PaymentGateway;
-import com.cartmodel.cartmodel.feign.ProductClient;
+// import com.cartmodel.cartmodel.feign.ProductClient;
 import com.cartmodel.cartmodel.feign.UserClient;
 import com.cartmodel.cartmodel.model.Cart;
 import com.cartmodel.cartmodel.model.CartItems;
@@ -32,8 +32,11 @@ public class CartService {
     @Autowired
     private PaymentGateway paymentGateway;
 
+    // @Autowired
+    // private ProductClient productClient;
+
     @Autowired
-    private ProductClient productClient;
+    private ProductService productService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -108,7 +111,8 @@ public class CartService {
                 .filter(ci -> ci.getProductId().equals(cartRequest.getProductId()))
                 .findFirst()
                 .orElse(null);
-        ProductDto productDto = productClient.getProductById(cartRequest.getProductId());
+        // ProductDto productDto = productClient.getProductById(cartRequest.getProductId());
+        ProductDto productDto = productService.getProductById(cartRequest.getProductId());
         if (productDto == null) {
             cartResponse cartResp = new cartResponse();
             cartResp.setProductId(cartRequest.getProductId());
@@ -175,7 +179,8 @@ public class CartService {
             CreateOrderDto orderDto = new CreateOrderDto();
             orderDto.setAmount(cart.getCartItems().stream()
                     .mapToInt(item -> {
-                        ProductDto product = productClient.getProductById(item.getProductId());
+                        // ProductDto product = productClient.getProductById(item.getProductId());
+                        ProductDto product = productService.getProductById(item.getProductId());
                         return item.getQuantityAdded() * product.getPrice();
                     })
                     .sum() * 100); // amount in smallest currency unit
