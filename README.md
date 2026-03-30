@@ -1,105 +1,129 @@
-https://roadmap.sh/projects/scalable-ecommerce-platform
+# Atlas
 
-ATLAS
-=====
+**Atlas** is a microservices-based ecommerce platform blueprint built with Spring Boot and an optional JavaScript frontend.
 
-_Transforming Commerce, Empowering Every Digital Journey_
+- Backend: Spring Boot (Java 21), Spring Cloud (Eureka, Gateway, Config, Feign), Resilience4j, Zipkin, Redis, JWT/OAuth2.
+- Deployment pattern: modular microservices with central service discovery and API gateway.
 
-![last-commit](https://img.shields.io/github/last-commit/achyutvardhan/Atlas?style=flat&logo=git&logoColor=white&color=0080ff) ![repo-top-language](https://img.shields.io/github/languages/top/achyutvardhan/Atlas?style=flat&color=0080ff) ![repo-language-count](https://img.shields.io/github/languages/count/achyutvardhan/Atlas?style=flat&color=0080ff)
+## Status
 
-_Built with the tools and technologies:_
+- ✓ Project structure analyzed
+- ✓ `Atlas-Backend` multi-module Maven parent + 9 microservices
+- ✓ `configserver` and `eurekaserver` present for configuration/service discovery
+- ✓ `start-service.sh` container for local orchestration
 
-![JSON](https://img.shields.io/badge/JSON-000000.svg?style=flat&logo=JSON&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000.svg?style=flat&logo=Markdown&logoColor=white) ![Spring](https://img.shields.io/badge/Spring-000000.svg?style=flat&logo=Spring&logoColor=white) ![npm](https://img.shields.io/badge/npm-CB3837.svg?style=flat&logo=npm&logoColor=white) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E.svg?style=flat&logo=JavaScript&logoColor=black) ![GNU%20Bash](https://img.shields.io/badge/GNU%20Bash-4EAA25.svg?style=flat&logo=GNU-Bash&logoColor=white)  
-![React](https://img.shields.io/badge/React-61DAFB.svg?style=flat&logo=React&logoColor=black) ![XML](https://img.shields.io/badge/XML-005FAD.svg?style=flat&logo=XML&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6.svg?style=flat&logo=TypeScript&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-646CFF.svg?style=flat&logo=Vite&logoColor=white) ![ESLint](https://img.shields.io/badge/ESLint-4B32C3.svg?style=flat&logo=ESLint&logoColor=white)
+## Architecture
 
-  
+1. **Eureka Server** (`Atlas-Backend/eurekaserver`) - service registry.
+2. **API Gateway** (`Atlas-Backend/apigateway`) - routing, security, metrics, circuit breaker.
+3. **Domain services**:
+   - `usermodel` (user account, auth)
+   - `productmodel` (catalog)
+   - `ordermodel` (orders)
+   - `cartmodel` (shopping cart)
+   - `paymentgateway` (payment orchestration)
+   - `sendemailservice` (email notifications)
+   - `sellermodel` (seller workflows)
+4. **Config Server** (`configserver`) - centralized property configuration.
 
-* * *
+## Prerequisites
 
-Table of Contents
------------------
+- Java 21 (OpenJDK 21+)
+- Maven 3.9+ (`mvn`), or use bundled wrapper scripts (`mvnw`, `mvnw.cmd`)
+- git
+- Optional: Docker 20+, Docker Compose for containerized deployments
 
-*   [Overview](#overview)
-*   [Getting Started](#getting-started)
-    *   [Prerequisites](#prerequisites)
-    *   [Installation](#installation)
-    *   [Usage](#usage)
-    *   [Testing](#testing)
+## Clone
 
-* * *
+```bash
+git clone https://github.com/achyutvardhan/Atlas.git
+cd Atlas
+```
 
-Overview
---------
+## Build
 
-Atlas is a modern, microservices-driven ecommerce platform that streamlines online shopping experiences through a scalable and maintainable architecture. It combines a React + TypeScript frontend powered by Vite with a robust backend ecosystem built on Spring Boot, featuring dedicated microservices for user management, products, orders, payments, and more.
+### Build all backend modules (root of repo)
 
-**Why Atlas?**
+```bash
+cd Atlas-Backend
+./mvnw clean install -DskipTests
+```
 
-This project enables developers to build high-performance, scalable ecommerce applications with ease. The core features include:
+or if `mvnw` is not executable:
 
-*   🧩 **Puzzle Piece:** Modular microservices architecture supporting independent deployment and scalability
-*   🚀 **Rocket:** Fast frontend development with React, TypeScript, and Vite for an optimized developer experience
-*   🔒 **Lock:** Secure user authentication using JWT, OAuth2, and email notifications
-*   🌐 **Globe:** Seamless inter-service communication via Feign clients and service discovery
-*   ⚙️ **Gear:** Centralized configuration for object mapping, security, and build processes
-*   🎯 **Target:** Focus on performance, maintainability, and rapid feature expansion
+```bash
+mvn clean install -DskipTests
+```
 
-* * *
+## Run (local dev)
 
-Getting Started
----------------
+### 1) Quick local startup script
 
-### Prerequisites
+From `Atlas-Backend`:
 
-This project requires the following dependencies:
+```bash
+./start-service.sh
+```
 
-*   **Programming Language:** Java
-*   **Package Manager:** Npm, Maven
+This starts services in sequence (Eureka, Gateway, User, Product, Order, Cart) with sleeps.
 
-### Installation
+### 2) Manual service launch order (recommended)
 
-Build Atlas from the source and install dependencies:
+1. `cd Atlas-Backend/eurekaserver && ./mvnw spring-boot:run`
+2. `cd Atlas-Backend/apigateway && ./mvnw spring-boot:run`
+3. `cd Atlas-Backend/usermodel && ./mvnw spring-boot:run`
+4. `cd Atlas-Backend/productmodel && ./mvnw spring-boot:run`
+5. `cd Atlas-Backend/ordermodel && ./mvnw spring-boot:run`
+6. `cd Atlas-Backend/cartmodel && ./mvnw spring-boot:run`
+7. `cd Atlas-Backend/paymentgateway && ./mvnw spring-boot:run`
+8. `cd Atlas-Backend/sendemailservice && ./mvnw spring-boot:run`
+9. `cd Atlas-Backend/sellermodel && ./mvnw spring-boot:run`
 
-1.  **Clone the repository:**
-    
-        ❯ git clone https://github.com/achyutvardhan/Atlas
-        
-    
-2.  **Navigate to the project directory:**
-    
-        ❯ cd Atlas
-        
-    
-3.  **Install the dependencies:**
-   
+> Tip: for each service, logs show registration in Eureka and gateway routes.
 
-**Using [maven](https://maven.apache.org/):**
+## Test
 
-    ❯ mvn install
-    
+Run tests for all modules:
 
-### Usage
+```bash
+cd Atlas-Backend
+./mvnw test
+```
 
-Run the project with:
+## API
 
+- Gateway likely exposed at `http://localhost:8080` (verify via `application.yml` in `apigateway/src/main/resources`)
+- Eureka dashboard: `http://localhost:8761`
+- Services auto-register and route via Eureka IDs (use gateway route config)
 
-**Using [maven](https://maven.apache.org/):**
+## Docker
 
-    mvn spring-boot:run
-    
+No active Docker Compose content in service folders; individual module `docker-compose.yml` files are present but empty in most modules.
 
-### Testing
+## Useful commands
 
-Atlas uses the {**test\_framework**} test framework. Run the test suite with:
+- `./mvnw -pl <module> spring-boot:run` to run one module from parent.
+- `./mvnw -pl <module> test` to run unit tests in one module.
+- `./mvnw dependency:tree` for troubleshooting.
 
+## Recommended inspection
 
-**Using [maven](https://maven.apache.org/):**
+- `Atlas-Backend/pom.xml` (parent module, Java+Spring versions)
+- `Atlas-Backend/eurekaserver/src/main/resources/application.yml` and `configserver/src/main/resources/application.yml` for endpoint setups.
+- `Atlas-Backend/apigateway/src/main/resources/application.yml` for gateway route definitions.
 
-    mvn test
-    
+## Enhancements
 
-* * *
+1. Implement Docker Compose orchestration with one root file including Eureka + Config + Gateway + services.
+2. Add a `frontend` directory and instructions for React/Vite integration if not already included.
+3. Add CI (GitHub Actions) to run `./mvnw test` and Docker build.
 
-[⬆ Return](#top)
+## Troubleshooting
 
-* * *
+- `java.net.ConnectException` on service startup: start Eureka first.
+- Port conflict: adjust `server.port` in each service.
+- Missing configuration property: verify config source for `configserver` or local `application.yml`.
+
+## License
+
+MIT-style / your choice.
