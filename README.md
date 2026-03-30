@@ -155,7 +155,3 @@ No active Docker Compose content in service folders; individual module `docker-c
 - `java.net.ConnectException` on service startup: start Eureka first.
 - Port conflict: adjust `server.port` in each service.
 - Missing configuration property: verify config source for `configserver` or local `application.yml`.
-
-## License
-
-MIT-style / your choice.
