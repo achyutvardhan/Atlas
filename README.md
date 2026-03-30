@@ -26,6 +26,35 @@
    - `sellermodel` (seller workflows)
 4. **Config Server** (`configserver`) - centralized property configuration.
 
+## Technology Stack
+
+- Java 21
+- Spring Boot 3.5.x (each microservice module)
+- Spring Cloud 2025 (Eureka, Gateway, Config, Feign, Circuit Breaker)
+- Spring Cloud Gateway (`Atlas-Backend/apigateway`)
+- Netflix Eureka (`Atlas-Backend/eurekaserver`)
+- Spring Cloud Config (`configserver`)
+- Spring Security (JWT/OAuth2) (`Atlas-Backend/apigateway`, `usermodel`)
+- Resilience4j and Micrometer/Zipkin tracing (`Atlas-Backend/apigateway`)
+- Redis (Reactive caching/session) (`Atlas-Backend/apigateway`)
+- Lombok (all Java modules)
+- Maven (build, dependency management)
+- Bash script startup (`Atlas-Backend/start-service.sh`)
+- Docker Compose placeholder `docker-compose.yml` in service folders
+
+### Module technology mapping
+
+- `Atlas-Backend/eurekaserver`: Eureka registry service
+- `Atlas-Backend/apigateway`: API gateway, routing, security, observability
+- `Atlas-Backend/usermodel`: user service, auth and profile management
+- `Atlas-Backend/productmodel`: product catalog service
+- `Atlas-Backend/ordermodel`: order processing service
+- `Atlas-Backend/cartmodel`: cart session/service
+- `Atlas-Backend/paymentgateway`: payment orchestration
+- `Atlas-Backend/sendemailservice`: email notifications
+- `Atlas-Backend/sellermodel`: seller accounts and listing management
+- `configserver`: Spring Cloud Config repository and config server
+
 ## Prerequisites
 
 - Java 21 (OpenJDK 21+)
